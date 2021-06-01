@@ -1,0 +1,3 @@
+!#/bin/bash
+cd /usr/bin
+sudo mysqldump -u root -p123456 my_project > /home/dan/home/programming/my_project/my_project_dump_30_05_21.sql

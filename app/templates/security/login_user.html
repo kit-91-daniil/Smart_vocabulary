@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+{% from "security/_macros1.html" import render_field_with_errors, render_field %}
+{% include "security/_messages_.html" %}
+
+<div class="container-fluid ph-2" >
+
+    <div class="row">
+        <div class="col-4 offset-4">
+            <h1 style="color: Teal; text-align: center;">Вход  </h1>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-lg-4">
+        </div>
+
+        <!--form group-->
+        <div class="col-lg-4" style="
+        background-color: #8EA3C1; color: #C5E1F7; font-size: 18pt; border-radius: 5%;">
+            <div class="p-0">
+                            <div class="p-3">
+
+                              <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+                                    {{ login_user_form.hidden_tag() }}
+                                    {{ render_field_with_errors(login_user_form.email, class="form-control") }}
+                                    {{ render_field_with_errors(login_user_form.password, class="form-control") }}
+                                    {{ render_field_with_errors(login_user_form.remember, class="form-check") }}
+                                    {{ render_field(login_user_form.submit, class="btn btn-info m-0") }}
+                                    {{ render_field(login_user_form.next) }}
+                                <a class="btn btn-success" href="/register">Зарегистрироваться</a>
+                              </form>
+                            </div>
+                      </div>
+
+                    </div>
+
+            </div>
+
+        </div>
+        <div class="col-lg-4"></div>
+
+    </div>
+</div>
+{% endblock %}

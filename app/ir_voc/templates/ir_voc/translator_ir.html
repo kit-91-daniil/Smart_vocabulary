@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block content %}
+{{ super() }}
+{% from "ir_voc/_form_helper.html" import render_form_field %}
+<div class="row pt-2 m-0">
+    <div class="col-6 col-md-4 " >
+
+         <div class="accordion" id="accordionExample"
+              style="padding: 3%; border-radius: 5%;
+              background-color: #0D3A5B; color: #D6D3C9;">
+
+<!--RANDOM TEST-->
+            <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+                <div class="card-header" id="headingTwo">
+                    <button class="btn btn-link collapsed"
+                            style="font-size: 4vmin; color: #D0C4B8;"
+                            type="button" data-toggle="collapse" data-target="#collapseTwo"
+                            aria-expanded="false" aria-controls="collapseTwo">
+                      Случайный тест
+                    </button>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+                     data-parent="#accordionExample">
+                  <div class="card-body"
+                  style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                    Здесь Вы можете пройти тестирование. Слова будут выбраны из словаря случайно.
+                      Все слова, представленные в тесте изучаются Вами по системе интеральных повторений.
+                     <a href="{{ url_for('word_test_bp.pass_test',
+                     test_type='random_interval', words_quantity=10) }}"
+                        class="btn btn-info mt-2" role="button" aria-pressed="true">
+                         Пройти тестирование
+                     </a>
+                  </div>
+                </div>
+
+            </div>
+<!--END OF RANDOM TEST-->
+
+<!--NEAR TEST-->
+            <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                <div class="card-header" id="headingThree">
+
+                    <button class="btn btn-link collapsed"
+                            style="font-size: 4vmin; color: #D0C4B8;"
+                            type="button" data-toggle="collapse"
+                            data-target="#collapseThree" aria-expanded="false"
+                            aria-controls="collapseThree">
+                      Ближайшие тесты ({{ words_status_dict["near_test_obj"].count() }})
+                    </button>
+
+                </div>
+
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
+                     data-parent="#accordionExample">
+                  <div class="card-body"
+                       style="border-radius: 2%; color: #013580;
+                       background-color: #C0E1F9;">
+                    Повторение этих слов желательно выполнить как можно быстрее
+
+                    {% if words_status_dict["near_test_obj"].count() %}
+
+                        <a href="{{ url_for('ir_voc.show_near_words', page_num=1, translation_available=0) }}"
+                           class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
+                            слов: {{ words_status_dict["near_test_obj"].count() }}
+                        </a>
+
+                      Ближайшее слово следует повторить через
+                       <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                                        {{ seconds_to_string(words_status_dict["near_test_obj"].first().time_to_repeat) }}
+                       </a>
+
+                       <a href="{{ url_for('word_test_bp.pass_test', test_type='near',
+                       words_quantity=10) }}"
+                       class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">Пройти тестирование
+                       </a>
+
+                    {% endif %}
+
+                  </div>
+                </div>
+            </div>
+    <!--END NEAR TEST-->
+
+    <!--MISSING TEST-->
+            <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                <div class="card-header" id="headingFour">
+
+                    <button class="btn btn-link collapsed" type="button"
+                            style="font-size: 4vmin; color: #D0C4B8;"
+                            data-toggle="collapse" data-target="#collapseFour"
+                            aria-expanded="false" aria-controls="collapseFour">
+                      Пропущенные слова ({{ words_status_dict["missing_test_obj"].count() }})
+                    </button>
+
+                </div>
+
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample"
+                style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                  <div class="card-body">
+
+                    {% if words_status_dict["missing_test_obj"].count() %}
+                    Вы пропустили опрос этих слов. Пройдите как можно быстрее тест, чтобы сохранить прогресс изучения.
+
+                        <a href="{{ url_for('ir_voc.show_missing_words', page_num=1, translation_available=0) }}"
+                           class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
+                            слов: {{ words_status_dict["missing_test_obj"].count() }}
+                        </a>
+
+                      Ближайшее слово следует повторить через
+                        <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                            {{ seconds_to_string(words_status_dict["missing_test_obj"].first().time_to_repeat) }}
+                        </a>
+
+                       <a href="{{ url_for('word_test_bp.pass_test', test_type='missing', words_quantity=10) }}"
+                       class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
+                           Пройти тестирование
+                       </a>
+
+                    {% endif %}
+
+                  </div>
+                </div>
+            </div>
+<!--END OF MISSING TEST-->
+
+<!--LOST TEST-->
+            <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                <div class="card-header" id="headingFive">
+
+                    <button class="btn btn-link collapsed" type="button"
+                            style="font-size: 4vmin; color: #D0C4B8;"
+                            data-toggle="collapse" data-target="#collapseFive"
+                            aria-expanded="false" aria-controls="collapseFive">
+                      Потерянный тест ({{ words_status_dict["lost_test_obj"].count() }})
+                    </button>
+
+                </div>
+
+                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordionExample"
+                style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                  <div class="card-body">
+
+                    {% if words_status_dict["lost_test_obj"].count() %}
+                    Вы не повторяли эти слова слишком давно. Цикл их изучения начнентся заново.
+
+                        <a href="{{ url_for('ir_voc.show_lost_words', page_num=1, translation_available=0) }}"
+                           class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
+                            слов: {{ words_status_dict["lost_test_obj"].count() }}
+                        </a>
+
+                      Опрос пропущен
+                       <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                                        {{ seconds_to_string(words_status_dict["lost_test_obj"].first().time_to_repeat) }}
+                       </a> назад
+
+                    {% endif %}
+
+                  </div>
+                </div>
+            </div>
+<!--END LOST TEST-->
+
+<!--LEARNED WORD TEST-->
+            {% if words_status_dict["learned_test_obj"].count() %}
+            <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                <div class="card-header" id="headingLearned">
+
+                    <button class="btn btn-link collapsed" type="button"
+                            data-toggle="collapse" data-target="#collapseLearned"
+                            aria-expanded="false" aria-controls="collapseLearned"
+                            style="font-size: 4vmin; color: #D0C4B8;">
+                      Изученные слова ({{ words_status_dict["learned_test_obj"].count() }})
+                    </button>
+
+                </div>
+
+                <div id="collapseLearned" class="collapse" aria-labelledby="headingLearned" data-parent="#accordionExample"
+                style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                  <div class="card-body">
+
+                    Вы полностью завершили изучение этих слов
+
+                        <a href="{{ url_for('ir_voc.show_learned_words', page_num=1, translation_available=0) }}"
+                           class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
+                            слов: {{ words_status_dict["learned_test_obj"].count() }}
+                        </a>
+
+                        <a href="{{ url_for('word_test_bp.pass_test', test_type='learned', words_quantity=10) }}"
+                            class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
+                            Пройти тестирование
+                        </a>
+                  </div>
+                </div>
+            </div>
+            {% endif %}
+     <!--END LEARNED TEST-->
+
+
+         </div> <!-- END OF ACCORDION-->
+    </div> <!--END OF COL-LG-4-->
+
+
+    <div class="col-6 col-md-4" align="justify" >
+        <!--<div class="media">-->
+           <!--<img src="{{ url_for('static', filename='images/memory.jpg', _external=True) }}" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%;">-->
+            <!--<div class="media-body m-3">-->
+                <h2 style="text-align: center; font-size: 5vmin; color: teal;">
+                    Словарь с интервальными повторениями</h2>
+                <h2 style="font-size: 4vmin; color: teal;">
+                    Добро пожаловать в Ваш личный словарь. С его помощью вы сможете значительно улучшить
+                    качество своего обучения и усвоения английской лексики. Весь секрет в том, что метод
+                    интервальных повторений, нацелен на углубленное запоминание информации.
+                    Приложение будет спрашивать у вас выученные английские слова именно в тот момент,
+                    когда ваш мозг собирается стереть их из памяти.</h2>
+            <!--</div>-->
+        <!--</div>-->
+    </div>
+
+<!--adding and deleting words form-->
+    <div class="col-md-4 pt-2 " style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; color: #013580; background-color: #C0E1F9;">
+        <h3>Ваш персональный интервальный переводчик</h3>
+            <form method="post" action="{{url_for('ir_voc.add_word', _external=True)}}">
+                {{ add_word_form.hidden_tag() }}
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col" style="font-size: 18px; font-weight: 600;">
+                            {{ render_form_field(add_word_form.word) }}
+                        </div>
+                        <div class="col mt-4" >
+                            {% if session["translating_result_ir"] %}
+                            <div id="translation_word" style="min-height: 50px; width: 200px;
+                            height: auto; background-color: #0069D9; color: #FFFFFF;
+                            border-radius: 5%; text-align: center; display: table-cell;
+                            vertical-align: center; font-size: 24px;">
+                                {{ session["translating_result_ir"] }}
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="row pt-1">
+                        <div class="col">
+                            {{ add_word_form.submit(class="btn btn-primary") }}
+                            <button type="reset" class="btn btn-primary">Очистить</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        <form method = "post" action="{{ url_for('ir_voc.delete_word') }}">
+            <div class="form-group m-0">
+                <div class="row">
+                    <div class="col" style="font-size: 18px; font-weight: 600;">
+                        {{ delete_word_form.hidden_tag() }}
+                        {{ render_form_field(delete_word_form.word) }}
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                    {{ delete_word_form.submit(class="btn btn-info") }}
+                   <button type="reset" class="btn btn-primary">Очистить</button>
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+            <div class="col">
+                <a style="width: 150px;" href="{{ url_for('ir_voc.show_user_voc_ir',
+                page_num=1, translation_available=0) }}"
+                   class="btn btn-info mt-2" role="button" aria-pressed="true">Словарь</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+"""
+
+"""

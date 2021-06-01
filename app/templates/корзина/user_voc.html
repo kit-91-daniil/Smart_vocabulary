@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block app_content %}
+
+<div class="container-fluid pt-3">
+{% if alert %}
+    <div class="row">
+        <div class="alert alert-danger" role="alert" style="font-size: 24px;">
+            No Internet connection
+        </div>
+    </div>
+{% endif %}
+
+
+<div class="row">
+    <div class="col-lg-7" align="justify">
+        <div class="media">
+           <img src="{{ url_for('static', filename='images/book1.jpg', _external=True) }}" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%;">
+            <div class="media-body m-3">
+                <h4>Добро пожаловать на страничку вашего словаря. <br> C его помощью вы можете легко и быстро переводить слова и выражения
+                с английского языка на русский.<br> Более того каждое переведенное слово с его переводом будет добавляться в словарь.
+                <br> Благодаря этому вы всегда сможете повторить ранее переведенные слова как с помощью обычного теста, так и с помощью
+                серии тестов по Janki-методике.</h4>
+            </div>
+        </div>
+    </div>
+
+    <!--adding and deleting words form-->
+    <div class="col-lg-4 pt-2 " style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; color: #013580; background-color: #C0E1F9;">
+        <h3>Ваш персональный переводчик</h3>
+            <form method="post" action="{{url_for('voc.add_word', _external=True)}}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col" style="font-size: 18px; font-weight: 600;">
+                            {{ wtf.form_field(add_word_form.word) }}
+                        </div>
+                        <div class="col">
+                            {% if translate %}
+                            <div id="translation_word" style="min-height: 50px; width: 200px; height: auto; background-color: #0069D9; color: #FFFFFF; border-radius: 5%;
+                            text-align: center; display: table-cell; vertical-align: middle; font-size: 24px;">
+                                {{ translate }}
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="row pt-1">
+                        <div class="col">
+                            <button type="submit" class="btn btn-primary">Перевести</button>
+                            <button type="reset" class="btn btn-primary">Очистить</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        <form method = "post" action="{{ url_for('delete_the_word', login=login) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group m-0">
+                <div class="row">
+                    <div class="col" style="font-size: 18px; font-weight: 600;">
+                    {{ wtf.form_field(delete_word_form.word) }}
+                    </div>
+                    <div class="col">
+                        {% if note %}
+                        <div style="min-height: 50px; width: 200px; height: auto; background-color: #0069D9; color: #FFFFFF; border-radius: 5%;
+                        text-align: center; display: table-cell; vertical-align: middle;">
+                            {{ note }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                    <button type="submit" class="btn btn-primary">Удалить</button>
+                    <button type="reset" class="btn btn-primary">Очистить</button>
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col">
+             <a href="{{ url_for('show_user_voc', login=login, page_num=1) }}"
+                   class="btn btn-success btn-block mt-2" role="button" aria-pressed="true">Словарь</a>
+            </div>
+            <div class="col">
+
+                 <a href="{{ url_for('random_words_test', login=login,
+                    word_number=0) }}" class="btn btn-secondary btn-block mt-2" role="button" aria-pressed="true">
+                    Пройти тестирование
+                 </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+    {% block scripts %}
+        {{ super() }}
+            {% if pagin_object %}
+                <script>
+                    $(document).ready(function(){
+                        $("#modal_vocabulary").modal("show");
+                    } );
+                </script>
+            {% endif %}
+    {% endblock %}
+
+<!--modal window for vocabulary-->
+<div id="modal_vocabulary" class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        {% if pagin_object %}
+                        <div class="p-3">
+                            <div class="row justify-content-between">
+                                <div class="col">
+                                    <form method="post" action="{{url_for('search_word_vocabulary', login=login, page_num=pagin_object.page)}}" >
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <div class="form-group" style="font-weight: 600; font-size: 20px;">
+                                            <!--<label for="search_word_vocabulary" style="color: #8EA3C1">Введите слово</label>-->
+                                            <!--<input name="word_from_vocabulary" type="text" id="search_word_vocabulary" class="form-control" placeholder="Word">-->
+                                            {{ wtf.form_field(word_to_search.word) }}
+                                        </div>
+                                            {{ wtf.form_field(word_to_search.submit) }}
+
+                                        <!--<button type="submit" class="btn btn-info">Submit</button>-->
+                                    </form>
+                                </div>
+                                <div class="col align-self-end">
+                                    <a href="{{ url_for('user_voc', login=login) }}"
+                                    class="btn btn-info" role="button" aria-pressed="true">Назад к словарю</a>
+                                </div>
+                            </div>
+                        {% if word %}
+                        <div class="row pt-3" style="font-weight: 600; font-size:22px;">
+
+                                <div class="col">
+                                    <div class="alert alert-primary" role="alert" style="color:green;">
+                                        {{ word }}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="alert alert-primary" role="alert" style="color:green;">
+                                        {{ modal_translate }}
+                                    </div>
+                                </div>
+
+                        </div>
+                        {% endif %}
+
+                        <div class="row pt-3">
+
+                                    <div class="col" style="color: #013580; font-weight: 600; font-size: 18px;">
+                                        <table class="table table-striped">
+                                          <thead>
+                                            <tr>
+                                              <th scope="col">Number</th>
+                                              <th scope="col">Word</th>
+                                              <th scope="col">Translate</th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                          {% for i in pagin_object.items %}
+                                            <tr>
+                                              <th scope="row">{{ pagin_object.items.index(i)+1 }}</th>
+                                              <td>{{ i.word }}</td>
+                                              <td>{{ i.translation }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                          </tbody>
+                                        </table>
+                                        <nav aria-label="Page navigation example">
+                                          <ul class="pagination">
+                                              {% for page in pagin_object.iter_pages(left_edge=3, right_edge=3,
+                                              left_current=3, right_current=3) %}
+                                                  {% if page %}
+                                                    <li class="page-item" >
+                                                        <a class="page-link"
+                                                           href="{{ url_for('show_user_voc', login=login, page_num=page) }}">{{page}}
+                                                        </a>
+                                                    </li>
+                                                  {% else %}
+                                                   ....
+                                                  {% endif %}
+                                              {% endfor %}
+                                          </ul>
+                                        </nav>
+
+                                    </div>
+                        </div>
+
+                        </div>
+                        {% endif %}
+                    </div>
+                  </div>
+</div>
+<!--modal window for vocabulary end-->
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block app_content %}
+<div class="container-fluid" style="bg-color: #C5DDEF;">
+{% if pag_object_two_hours %}
+
+    <div class="row" style="width: 60%; position: absolute; margin-left: 20%;
+    margin-right: 20%;">
+        <div class="col" style="color: #013580;">
+
+            <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Number</th>
+                      <th scope="col">Word</th>
+                        <th scope="col">
+
+                            <a style="width: 150px;" href="{{ url_for('show_two_hours_words', login=login,
+                            page_num=pag_object_two_hours.page, translate_button=1) }}"
+                            class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
+                            </a>
+
+                        </th>
+                    </tr>
+                  </thead>
+            {% endif %}
+                  <tbody>
+                    {% if pag_object_two_hours %}
+                        {% for (j,i) in enumerate(pag_object_two_hours.items, 1) %}
+                            <tr>
+                              <td>{{ j }}</td>
+                              <td>{{ i.word }}</td>
+                                {% if show_translation %}
+                                    <td>{{ i.translation }}</td>
+                                {% else %}
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                            <tr>
+                              <td></td>
+                              <td>СЛОВАРЬ ПУСТ</td>
+                                <td></td>
+                            </tr>
+                    {% endif %}
+                  </tbody>
+
+            </table>
+
+            {% if pag_object_two_hours %}
+               <nav aria-label="Page navigation example">
+                      <ul class="pagination">
+                          {% for page in pag_object_two_hours.iter_pages(left_edge=3, right_edge=3,
+                          left_current=3, right_current=3) %}
+                              {% if page %}
+                                <li class="page-item" >
+                                    <a class="page-link"
+                                       href="{{ url_for('show_two_hours_words', login=login, page_num=page,
+                                       translate_button=2) }}">{{page}}
+                                    </a>
+                                </li>
+                              {% else %}
+                               ....
+                              {% endif %}
+                          {% endfor %}
+                      </ul>
+                </nav>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

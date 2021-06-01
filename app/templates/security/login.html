@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% include "security/_messages.html" %}
+<div class="container-fluid ph-2">
+
+    <div class="row">
+        <div class="col-lg-8">
+        <div class="media pt-3">
+            <img src="../static/images/mini_english-icon.png" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%; position: relative;">
+
+            <div class="media-body pl-4 pr-4">
+                <h2 align="center">Виртуальный словарь</h2>
+                <h3>{{ current_user.name }}</h3>
+                    <h4 align="justify">Ключ к изучению английской лексики - регулярные повторения
+                        изученных слов. Это приложение значительно облегчит этот процесс. Не надо искать
+                        переводчик, он у нас уже есть. Все, что требуется от Вас - это желание учиться.
+                        Используйте виртуальный словарь для быстрого первода английских слов, а чтобы вы не
+                        забыли их через пару дней, мы их запомним, спросим и даже поставим оценку.
+                    </h4>
+                </div>
+        </div>
+        </div>
+        <!--form group-->
+        <div class="col-lg-4" style="
+        background-color: #8EA3C1; color: #C5E1F7; font-size: 18pt; border-radius: 5%;">
+            <div class="p-0">
+                            <div class="p-3">
+
+                           <form action="{{ url_for_security('login') }}" method="POST" name="login_user_form">
+                              {{ login_user_form.hidden_tag() }}
+                              {{ render_field_with_errors(login_user_form.email) }}
+                              {{ render_field_with_errors(login_user_form.password) }}
+                              {{ render_field_with_errors(login_user_form.remember) }}
+                              {{ render_field(login_user_form.next) }}
+                              {{ render_field(login_user_form.submit) }}
+                            </form>
+
+
+                            <form method="post" action="{{url_for('log_in')}}" >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="form-group" style="color: #8EA3C1">
+                                {{ wtf.form_field(login_form.email) }}
+                                </div>
+                                <div class="form-group" style="color: #8EA3C1">
+                                {{ wtf.form_field(login_form.password) }}
+                                </div>
+                                <div class="form-group" style="color: #8EA3C1; font-size: 14px;">
+                                    {{ wtf.form_field(login_form.remember) }}
+                                </div>
+                                <button type="submit" class="btn btn-info">Войти</button>
+                            </form>
+                            </div>
+                      </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% include "security/_menu.html" %}
+{% endblock %}

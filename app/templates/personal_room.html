@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid pt-4">
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="row">
+            <div class="col-3">
+                        <div class="alert alert-success" role="alert"
+                             style="font-weight: 600; font-size: 16px;">
+                            {{ messages[0] }}
+                        </div>
+            </div>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+
+        <!--ACCORDION-->
+        <div class="col-5">
+            <div id="accordion"
+                 style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; background-color: #0D3A5B; color: #D6D3C9;">
+
+                  <div class="card" style="background-color: #0D3A5B; color: white;">
+                      <div class="card-header" id="headingOne">
+                      <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne"
+                        style="font-size: 22px; font-weight: 600; color: white;">
+                            Изучаем английский язык
+                        </button>
+                      </h5>
+                    </div>
+
+                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                      <div class="card-body" align="justify"
+                      style="border-radius: 2%; color: #00282E; font-weight: 600; background-color: #C0E1F9;">
+                        Выбирайте сами скорость изучения слов. В Вашем распоряжении онлайн переводчик.
+                          Более того, переведенные слова будут заноситься в словарь. Таким образом Вы сможете
+                          периодически повторять те слова, перевод которых Вам понадобился.
+                      <a href="{{ url_for('voc.user_voc') }}"
+                       class="btn btn-success btn-block" role="button" aria-pressed="true">
+                          Словарь</a>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="card" style="background-color: #0D3A5B; color: #FFFFFF;">
+                    <div class="card-header" id="headingTwo">
+                      <h5 class="mb-0">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"
+                        style="font-size: 22px; font-weight: 600; color: #D0C4B8;">
+                          Изучаем английский по системе ИП
+                        </button>
+                      </h5>
+                    </div>
+
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion"
+                    style="border-radius: 2%; color: #00282E; font-weight: 600; background-color: #C0E1F9;">
+                      <div class="card-body" align="justify">
+                        Изучайте язык с помощью системы интервальных повторений. Она нацелена на более
+                          глубокое изучение лексики благодаря повторениям слов в определенные периоды времени
+                          именно тогда, когда Ваш мозг считает нужным стереть неиспользуемую информацию.
+                          При таком подходе такое повторение позволит Вам крепко усвоить изученные слова.
+                      <a href="{{ url_for('ir_voc.user_voc') }}"
+                       class="btn btn-success btn-block" role="button" aria-pressed="true">
+                          Словарь с интервальными повторениями</a>
+                      </div>
+                    </div>
+
+                  </div>
+            </div>
+        </div>
+        <!--END OF ACCORDION-->
+
+        <div class="col" align="justify"
+             style="border: solid #9CB6D5; padding: 3%; border-radius: 5%; color: #013580; background-color: #C0E1F9;">
+            <h2 id="h2_hello">Добро пожаловать в личный кабинет</h2>
+            <h3>
+                Здесь Вы можете выбрать два способа изучения английской лексики:
+                обычным изучением и повторением слов или с помощью
+                системы интервальных повторений. Второй способ намного удобнее и продуктивнее.
+                Благодаря этой системе Вы сможете надолго закрепить в памяти
+                изученный материал
+            </h3>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

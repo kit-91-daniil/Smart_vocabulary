@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css"
+      href="{{ url_for('static',filename='css/custom_error_pages_style.css') }}">
+{% endblock %}
+    {% block title %}
+        page not found
+    {% endblock %}
+
+    {% block content %}
+    {{ super() }}
+    <div class="row">
+        <div class="col-4 offset-4 ">
+            <div class="error_number">404</div>
+            <div class="error_description">Страница не найдена</div>
+            <div >
+                <a class="btn btn-success btn-large btn-block"
+                   style="color: white; font-size: 2rem;"
+                   href="{{ url_for('main.personal_room') }}">
+                На главную
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}

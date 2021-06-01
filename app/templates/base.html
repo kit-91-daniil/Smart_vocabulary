@@ -1,0 +1,71 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" type="text/css"
+      href="{{ url_for('static',filename='css/changes.css') }}">
+<link rel="stylesheet" type="text/css"
+      href="{{ url_for('static', filename='css/custom_styles.css')}}">
+{% endblock %}
+    {% block title %}
+    {{ title }}
+    {% endblock %} | Flask app
+    <div class="container">
+    {% block navbar %}
+            <div class="row m-0">
+                <div class="col p-0">
+                    <nav class="navbar navbar-expand-lg navbar-light sticky-top custom_navbar"
+                    style="font-size: 2vw;">
+                        <a class="navbar-brand" href="/login" style="font-size: 2vw;">
+                            главная
+                        </a>
+
+                        <button class="navbar-toggler" type="button" data-toggle="collapse"
+                                data-target="#navbarText" aria-controls="navbarText"
+                                aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                        </button>
+                        {% if current_user.is_authenticated %}
+                        <div class="collapse navbar-collapse" id="navbarText">
+                        <ul class="navbar-nav mr-auto">
+
+                        </ul>
+                        <span class="navbar-text">
+                            <a class="nav-link" href="/admin/student">профиль</a>
+                        </span>
+                        <span class="navbar-text">
+                            <a class="nav-item nav-link active"
+                            href="{{ url_for('security.logout') }}">выход</a>
+                        </span>
+                        </div>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+
+        {% endblock %}
+
+        {% block content_title %}
+
+        {% endblock %}
+
+        {% block content %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="col-6 alert alert-{{category}}" role="alert">
+                  <ul class="m-0">
+                      <li>{{ message }}</li>
+                  </ul>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% endblock %}
+        {% block scripts %}
+        {{ super() }}
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        {% endblock %}
+    </div>

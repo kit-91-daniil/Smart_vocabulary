@@ -1,0 +1,23 @@
+h1 {
+color: blue;
+    }
+
+body {
+    padding-top: 0px;
+    background-color: blue;
+    }
+
+
+.error_number{
+    color: #F6430D;
+    font-size: 8rem;
+    font-weight: 800;
+    text-align: center;
+    }
+
+.error_description{
+    font-size: 4rem;
+    color: white;
+    text-align: center;
+    font-weight: 800;
+    }

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block app_content %}
+<div class="container-fluid p-4" style="background-color: #58A7A4;">
+    {% if not all_words_checked %}
+    <div class="container align-content-center w-50" style="background-color: #9BBABD;">
+        <div class="row align-items-center p-1">
+            <div class="col">
+            </div>
+            <div class="col-8">
+                <div class="alert alert-dark " role="alert" style="font-size: 2em; height: 2em;
+                text-align: center; justify-content: center;">
+                  {{ asked_word }} <a href="#" class="alert-link"></a>
+                </div>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+            <div class="row align-items-center">
+                <div class="col">
+                </div>
+                <div class="col">
+                <form method="post" action="{{url_for('check_near_word', login=login, word_number=word_number )}}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <div class="form-group row" style="font-weight: 600; font-size: 20px;">
+                    <div class="col">
+                      <!--<input type="text" class="form-control" name="janki_near_test_word" id="janki_near_test_word_form"-->
+                      {{ wtf.form_field(answer_form.word) }}
+                    </div>
+                  </div>
+                     <div class="row align-items-center">
+                         <div class="col-4">
+                             {{ wtf.form_field(answer_form.submit) }}
+                            <!--<button type="submit" class="btn btn-primary">Проверить</button>-->
+                         </div>
+                     </div>
+                </form>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+            <div class="row" style="height: 12rem;">
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-4 p-0">
+                    <a href="{{ url_for('janki_voc', login=login) }}"
+                        class="btn btn-info ml-4" role="button" aria-pressed="true">Назад к словарю
+                    </a>
+                </div>
+                <div class="col">
+                </div>
+                <div class="col-4">
+                    <a style="width: 150px;" href="{{ url_for('check_near_word', login=login, word_number=word_number+1) }}"
+                    class="btn btn-info" role="button" aria-pressed="true">Следующее слово</a>
+                </div>
+            </div>
+            <div class="row" style="height: 60px;">
+                <div class="col">
+                </div>
+                <div class="col-6 align-self-center progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ round(100*(word_number)/session['len_near_words'])}}%;" aria-valuenow="{{ round(100*(word_number + 1)/session['len_near_words'])}}" aria-valuemin="0" aria-valuemax="100">{{ round(100*(word_number)/session["len_near_words"])}}%</div>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+        </div>
+    </div>
+        {% else %}
+<!--THE END OF THE QUEST-->
+
+    <div class="container align-content-center w-50" >
+        <div class="row align-items-center p-1">
+            <div class="col">
+            </div>
+            <div class="col-8 align-content-center" style="font-size: 34px; font-weight: 600; color: #172E36;">
+                Тест пройден
+            </div>
+            <div class="col">
+            </div>
+        </div>
+        <div class="row align-items-center p-1">
+            <div class="col">
+            </div>
+            <div class="col-8">
+                <div class="alert alert-success" role="alert" style="font-size: 30px; font-weight: 600;">
+                    Правильных ответов: {{ session["right_answers_near_words"] }}
+                </div>
+                <div class="alert alert-danger" role="alert" style="font-size: 30px; font-weight: 600;">
+                    Ошибочных ответов: {{ session["wrong_answers_near_words"] }}
+                </div>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+        <div class="row justify-content-center p-1">
+           <div class="col-4 align-self-center" style="color: green; font-size: 50px;">
+                {% if (session["right_answers_near_words"] + session["wrong_answers_near_words"]) != 0 %}
+                    {{ round(100*session["right_answers_near_words"]/(session["right_answers_near_words"] + session["wrong_answers_near_words"])) }} %
+                {% else %}
+                    0 %
+                {% endif %}
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-4 p-0">
+                <a href="{{ url_for('janki_voc', login=login) }}"
+                class="btn btn-secondary btn-lg" role="button" aria-pressed="true">Назад к словарю
+                </a>
+            </div>
+        </div>
+    </div>
+
+        {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="modal_near_words_test" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% if result=="ПРАВИЛЬНО" %}
+            <div class="alert alert-success align-items-center justify-content-center" role="alert"
+                 style="font-size: 28px;" >
+                {{ result }}
+            </div>
+        {% else %}
+            <div class="alert alert-danger align-items-center justify-content-center" role="alert"
+                 style="font-size: 28px;">
+                {{ result }}
+            </div>
+          <div class="row">
+            <div class="col">
+                <div class="alert alert-success" role="alert">
+                    {{ asked_word }}
+                </div>
+            </div>
+            <div class="col">
+                <div class="alert alert-success" role="alert">
+                    {{ translation }}
+                </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+            <a style="width: 150px;" href="{{ url_for('check_near_word', login=login, word_number=word_number+1) }}"
+           class="btn btn-info mt-2" role="button" aria-pressed="true">Следующее слово</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+        {% block scripts %}
+            {{ super() }}
+                {% if result %}
+                    <script>
+                        $(document).ready(function(){
+                            $("#modal_near_words_test").modal("show");
+                        } );
+                    </script>
+                {% endif %}
+        {% endblock %}
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "voc/_form_helper.html" import render_form_field %}
+{% block content %}
+{{ super() }}
+
+    <h1 class="ml-2" style="color: green;">Словарь</h1>
+
+{% if user_words_pagin_obj %}
+    <div>
+        <div class="row justify-content-between pl-2 m-0">
+            <div class="col">
+
+                <form method="post" action="{{url_for('voc.search_word_user_voc',
+                page_num=user_words_pagin_obj.page)}}" >
+                        {{ word_to_search.hidden_tag() }}
+                    <div class="form-group form_label_custom">
+                        {{ render_form_field(word_to_search.word) }}
+                    </div>
+
+                     {{ word_to_search.submit(class="btn btn-info") }}
+                </form>
+
+            </div>
+            <div class="col align-self-end">
+
+                {% if session["searching_word"] %}
+
+                <div class="alert alert-success" style="font-weight: 700; font-size: 18px;">
+                    {{ session["searching_word_translation"] }}
+                </div>
+                {% endif %}
+
+                <a href="{{ url_for('voc.user_voc') }}"
+                class="btn btn-info" role="button" aria-pressed="true">Назад к переводчику</a>
+            </div>
+        </div>
+
+        <div class="row pt-3 m-0">
+
+            <div class="col" style="color: #013580; font-weight: 600; font-size: 18px;">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col"></th>
+                      <th scope="col">Слово</th>
+                      <th scope="col">Перевод</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                  {% for i in user_words_pagin_obj.items %}
+                    <tr>
+                      <th scope="row">{{ user_words_pagin_obj.items.index(i)+1 }}</th>
+                      <td>{{ i.vocabulary.word }}</td>
+                      <td>{{ i.vocabulary.translation }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <nav aria-label="Page navigation example">
+                  <ul class="pagination">
+                      {% for page in user_words_pagin_obj.iter_pages(left_edge=3, right_edge=3,
+                      left_current=3, right_current=3) %}
+                          {% if page %}
+                            <li class="page-item" >
+                                <a class="page-link"
+                                   href="{{ url_for('voc.show_user_voc', page_num=page) }}">{{page}}
+                                </a>
+                            </li>
+                          {% else %}
+                           ....
+                          {% endif %}
+                      {% endfor %}
+                  </ul>
+                </nav>
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% for word in user_words %}
+        {{ word.vocabulary.word }} - {{ word.vocabulary.translation }}<br>
+    {% endfor %}
+
+{% endblock %}

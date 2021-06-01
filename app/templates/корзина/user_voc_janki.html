@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+{% block app_content %}
+
+<div class="container-fluid">
+    {% if alert %}
+        <div class="row">
+            <div class="alert alert-danger" role="alert" style="font-size: 24px;">
+                No Internet connection
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+
+        <div class="col-lg-4" >
+             <div class="accordion" id="accordionExample" style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; background-color: #0D3A5B; color: #D6D3C9;">
+
+<!--СЛУЧАЙНЫЙ ТЕСТ-->
+                      <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                            <div class="card-header" id="headingTwo">
+                              <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo"
+                                style="font-size: 24px; color: #D0C4B8;">
+                                  Случайный тест
+                                </button>
+                              </h5>
+                            </div>
+
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample"
+                            style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                              <div class="card-body">
+                                Здесь Вы можете пройти тестирование. Слова будут выбраны из словаря случайно.
+                                  Все слова, представленные в тесте изучаются Вами по системе интеральных повторений.
+                                 <a style="display: block;" href="{{ url_for('random_ir_words_test', login=login,
+                                   word_number=0) }}" class="btn btn-info mt-2" role="button" aria-pressed="true">
+                                     Пройти тестирование
+                                 </a>
+                              </div>
+                            </div>
+
+                      </div>
+
+<!--БЛИЖАЙШИЙ ТЕСТ-->
+                      <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                        <div class="card-header" id="headingThree">
+                          <h5 class="mb-0">
+                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                    data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree"
+                            style="font-size: 24px; color: #D0C4B8;">
+                              Ближайшие тесты (2 часа)
+                            </button>
+                          </h5>
+                        </div>
+
+                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample"
+                        style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                          <div class="card-body">
+                            {% if two_hours_words %}
+
+                                Ближайший тест:<br>
+
+                                <a href="{{ url_for('show_two_hours_words', login=login, page_num=1,
+                                    translate_button=2, two_hours_words=two_hours_words) }}"
+                                   class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">{{ len(two_hours_words) }} слов
+                                </a>
+
+                               <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                                            {% if seconds_to_string(two_hours_words[0].time_to_repeat) %}
+                                                {{ seconds_to_string(two_hours_words[0].time_to_repeat) }}
+                                           {% endif %}
+                               </a>
+
+                               <a href="{{ url_for('near_words_test', login=login, word_number=0) }}"
+                               class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">Пройти тестирование
+                               </a>
+
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+
+    <!--МОДАЛЬНОЕ ОКНО ДЛЯ БЛИЖАЙШЕГО ТЕСТА-->
+                          <div id="positive_time_words" class="modal fade bd-example-modal-sm2" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                              <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="row">
+                                        <div class="col" style="color: #013580;">
+                                            <table class="table table-striped">
+
+                                                <thead>
+                                                <tr>
+                                                  <th scope="col">Number</th>
+                                                  <th scope="col">Word</th>
+                                                    <th scope="col">
+                                                      <button type="button" class="btn btn-primary btn-sm active" data-toggle="modal" data-target=".bd-example-modal-sm1" style="font-size: 18px;">
+                                                        Show Translation
+                                                      </button>
+                                                    </th>
+                                                </tr>
+                                              </thead>
+
+                                                <tbody>
+                                              {% if  two_hours_words %}
+                                              {% for (j,i) in enumerate(two_hours_words, 1) %}
+                                                <tr>
+                                                  <td>{{ j }}</td>
+                                                  <td>{{ i.word }}</td>
+                                                    <td></td>
+                                                </tr>
+                                                {% endfor %}
+                                              {% endif %}
+                                              </tbody>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                              </div>
+                          </div>
+
+
+
+<!--ПРОПУЩЕННЫЙ ТЕСТ-->
+                      <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
+
+                            <div class="card-header" id="headingFour">
+                              <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour"
+                                style="font-size: 24px; color: #D0C4B8;">
+                                  Пропущенные тесты
+                                </button>
+                              </h5>
+                            </div>
+
+                            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordionExample"
+                            style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
+                              <div class="card-body" style="font-size: 16px;">
+                                  {% if min_neg_time %}
+                                  Вы пропустили опрос<br>
+
+                                       <a href="{{ url_for('show_missing_words', login=login,
+                                       page_num=1, translate_button=2) }}"
+                                       class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">{{ len(min_neg_time) }} слов</a>
+
+                                       <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                                           {% if seconds_to_string(min_neg_time[0].time_to_repeat) %}
+                                                {{ seconds_to_string(min_neg_time[0].time_to_repeat) }}
+                                           {% endif %}
+                                       </a>
+
+                                       <a href="{{ url_for('missing_words_test', login=login,
+                                       word_number=0) }}"
+                                       class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">Пройти тестирование
+                                       </a>
+
+                                  {% endif %}
+                              </div>
+                            </div>
+                      </div>
+
+    <!--Модальное окно для ПРОПУЩЕННОГО ТЕСТА-------------------------- -->
+                        <div id="modal_pag_obj_missing" class="modal fade bd-example-modal-sm1" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                          <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="row">
+                                    <div class="col" style="color: #013580;">
+                                        <table class="table table-striped">
+
+                                          <thead>
+                                            <tr>
+                                              <th scope="col">Number</th>
+                                              <th scope="col">Word</th>
+                                                <th scope="col">
+                                                  <button type="button" class="btn btn-primary btn-sm active" data-toggle="modal" data-target=".bd-example-modal-sm1" style="font-size: 18px;">
+                                                    Show Translation
+                                                  </button>
+                                                </th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                            {% if min_neg_time %}
+                                                {% for (j,i) in enumerate(min_neg_time, 1) %}
+                                                    <tr>
+                                                      <td>{{ j }}</td>
+                                                      <td>{{ i.word }}</td>
+                                                        <td></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                {% else %}
+                                                    <tr>
+                                                      <td></td>
+                                                      <td>СЛОВАРЬ ПУСТ</td>
+                                                        <td></td>
+                                                    </tr>
+                                            {% endif %}
+                                          </tbody>
+
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+             </div>
+        </div>
+
+        <div class="col-lg-4" align="justify">
+            <!--<div class="media">-->
+               <!--<img src="{{ url_for('static', filename='images/memory.jpg', _external=True) }}" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%;">-->
+                <!--<div class="media-body m-3">-->
+                    <h2 style="text-align: center;">Словарь с интервальными повторениями</h2>
+                    <h4>Добро пожаловать в Ваш личный словарь. С его помощью вы сможете значительно улучшить
+                        качество своего обучения и усвоения английской лексики. Весь секрет в том, что метод
+                        интервальных повторений, нацелен на углубленное запоминание информации.
+                        Приложение будет спрашивать у вас выученные английские слова именно в тот момент,
+                        когда ваш мозг собирается стереть их из памяти.</h4>
+                <!--</div>-->
+            <!--</div>-->
+        </div>
+
+    <!--adding and deleting words form-->
+        <div class="col-lg-4 pt-2 " style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; color: #013580; background-color: #C0E1F9;">
+            <h3>Ваш персональный Janki переводчик</h3>
+                <form method="post" action="{{url_for('add_word_ir', login=login, _external=True)}}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group">
+                        <!--<label for="add_word_ir">Введите слово для перевода</label>-->
+                        <div class="row">
+                            <div class="col">
+                            <!--<input name="add_word_ir" type="text" id="add_word_ir" class="form-control" placeholder="word">-->
+                            {{ wtf.form_field(add_word_form.word) }}
+                            </div>
+                            <div class="col">
+                                {% if translate %}
+                                <div id="translation_word" style="min-height: 50px; width: 200px; height: auto; background-color: #0069D9; color: #FFFFFF; border-radius: 5%;
+                                text-align: center; display: table-cell; vertical-align: middle; font-size: 24px;">
+                                    {{ translate }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row pt-1">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">Перевести</button>
+                                <button type="reset" class="btn btn-primary">Очистить</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            <form method = "post" action="{{ url_for('delete_the_word_ir', login=login) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group m-0">
+                    <!--<label for="delete_word_ir">Введите слово для удаления</label>-->
+                    <div class="row">
+                        <div class="col">
+                        {{ wtf.form_field(delete_word_form.word) }}
+                        <!--<input name="delete_word_form_ir" type="text" id="delete_word_ir" class="form-control" placeholder="delete">-->
+                        </div>
+                        <div class="col">
+                            {% if note %}
+                            <div style="min-height: 50px; width: 200px; height: auto; background-color: #0069D9; color: #FFFFFF; border-radius: 5%;
+                            text-align: center; display: table-cell; vertical-align: middle;">
+                                {{ note }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                        <button type="submit" class="btn btn-primary">Удалить</button>
+                        <button type="reset" class="btn btn-primary">Очистить</button>
+                        </div>
+                        <div class="col">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col">
+                    <a style="width: 150px;" href="{{ url_for('show_user_janki_voc', login=login, page_num=1,
+                    translate_button=2) }}"
+                       class="btn btn-info mt-2" role="button" aria-pressed="true">Словарь</a>
+                </div>
+
+            </div>
+        </div>
+
+
+            <div id="modal_pag_obj_all" class="modal fade bd-example-modal-sm1" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    {% if pag_obj_all %}
+                    <div class="row">
+                        <div class="col" style="color: #013580;">
+                            <table class="table table-striped">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Number</th>
+                                  <th scope="col">Word</th>
+                                  <th scope="col">
+                                      <a style="width: 150px;" href="{{ url_for('show_user_janki_voc', login=login,
+                                      page_num=pag_obj_all.page, translate_button=1) }}"
+                                        class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
+                                      </a>
+                                  </th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                {% if pag_obj_all %}
+                                    {% for (j,i) in enumerate(pag_obj_all.items, 1) %}
+                                        <tr>
+                                          <td>{{ j }}</td>
+                                          <td>{{ i.word }}</td>
+                                        {% if show_translation %}
+                                            <td>{{ i.translation }}</td>
+                                        {% else %}
+                                            <td></td>
+                                        {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+
+                              </tbody>
+                            </table>
+
+                            {% if pag_obj_all %}
+                               <nav aria-label="Page navigation example">
+                                      <ul class="pagination">
+                                          {% for page in pag_obj_all.iter_pages(left_edge=3, right_edge=3,
+                                          left_current=3, right_current=3) %}
+                                              {% if page %}
+                                                <li class="page-item" >
+                                                    <a class="page-link"
+                                                       href="{{ url_for('show_user_janki_voc', login=login, page_num=page, translate_button=2) }}">{{page}}
+                                                    </a>
+                                                </li>
+                                              {% else %}
+                                               ....
+                                              {% endif %}
+                                          {% endfor %}
+                                      </ul>
+                                </nav>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+              </div>
+            </div>
+
+    </div>
+</div>
+
+{% block scripts %}
+            {{ super() }}
+                {% if pag_obj_near %}
+                    <script>
+                        $(document).ready(function(){
+                            $("#modal_pag_obj_near").modal("show");
+                        } );
+                    </script>
+                {% endif %}
+                {% if pag_obj_missing %}
+                    <script>
+                         $(document).ready(function(){
+                            $("#modal_pag_obj_missing").modal("show");
+                        } );
+                    </script>
+                {% endif %}
+                {% if pag_obj_all %}
+                    <script>
+                        $(document).ready(function(){
+                            $("#modal_pag_obj_all").modal("show");
+                        } );
+                    </script>
+                {% endif %}
+        {% endblock %}
+
+<!--modal window for vocabulary end-->
+{% endblock %}

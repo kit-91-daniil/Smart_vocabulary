@@ -1,0 +1,21 @@
+.custom_navbar {
+    background-color: #e3f2fd;
+    font-size: 22px;
+    font-weight: 600;
+    }
+
+.form_label_custom {
+    font-weight: 600;
+    font-size: 18px;
+    color: #013580
+}
+
+.form_zone {
+    border: solid #9CB6D5;
+    padding: 1%;
+    border-radius: 5%;
+    color: #013580;
+    background-color: #C0E1F9;
+}
+
+

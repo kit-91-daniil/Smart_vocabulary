@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+{{ super() }}
+{% from "voc/_form_helper.html" import render_form_field %}
+<div class="row m-0 pt-2">
+
+    <div class="col-12 col-md-4 pt-3" align="justify">
+        <div >
+           <img src="{{ url_for('static', filename='images/book1.jpg', _external=True) }}"
+                class="align-self-center" alt="flag" height=100% width=100%
+                style="border-radius: 50%;">
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4 pt-3" align="justify">
+        <div >
+            <h4>Добро пожаловать на страничку вашего словаря. <br>
+                C его помощью вы можете легко и быстро переводить слова и выражения
+                с английского языка на русский.<br>
+                Более того каждое переведенное слово с его переводом будет добавляться в словарь.<br>
+                Благодаря этому вы всегда сможете повторить ранее переведенные слова.
+            </h4>
+        </div>
+    </div>
+
+    <!--adding and deleting words form-->
+    <div class="col-12 col-md-4 m-0"
+         style="border: solid #9CB6D5; padding: 1%;
+         border-radius: 5%; color: #013580;
+         background-color: #C0E1F9;">
+        <h3>Ваш персональный переводчик</h3>
+            <form method="post" action="{{url_for('voc.add_word', _external=True)}}">
+                <div class="form-group form_label_custom">
+                    <div class="row">
+                        <div class="col">
+                            {{ add_word_form.hidden_tag() }}
+                            {{ render_form_field(add_word_form.word)}}
+                        </div>
+                        <div class="col mt-4" >
+                            {% if session["translating_result"] %}
+                            <div id="translation_word"
+                                 style="min-height: 50px; width: 200px; height: auto;
+                                 background-color: #0069D9; color: #FFFFFF; border-radius: 5%;
+                                 text-align: center; display: table-cell; vertical-align: center; font-size: 24px;">
+                                {{ session["translating_result"] }}
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ add_word_form.submit(class="btn btn-primary") }}
+                            <button type="reset" class="btn btn-primary">Очистить</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        <form method = "post" action="{{ url_for('voc.delete_word') }}">
+            <div class="form-group m-0">
+                <div class="row">
+                    <div class="col form_label_custom" >
+                    {{ delete_word_form.hidden_tag() }}
+                    {{ render_form_field(delete_word_form.word) }}
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                    <button type="submit" class="btn btn-primary">Удалить</button>
+                    <button type="reset" class="btn btn-primary">Очистить</button>
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col">
+             <a href="{{ url_for('voc.show_user_voc', page_num=1) }}"
+                   class="btn btn-success btn-block mt-2" role="button" aria-pressed="true">Словарь</a>
+            </div>
+            <div class="col">
+
+                 <a href="{{ url_for('word_test_bp.pass_test', test_type='random',
+                 words_quantity=10) }}"
+                 class="btn btn-secondary btn-block mt-2" role="button" aria-pressed="true">
+                    Пройти тестирование
+                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

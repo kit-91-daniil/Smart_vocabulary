@@ -1,0 +1,108 @@
+{% extends "base_.html" %}
+
+
+<div class="container-fluid ph-2">
+
+    {% block content_title %}
+            <h2>start page content</h2>
+    {% endblock %}
+
+    {% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+        <div class="media pt-3">
+            <img src="../static/images/mini_english-icon.png" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%; position: relative;">
+
+            <div class="media-body pl-4 pr-4">
+                <h2 align="center">Виртуальный словарь</h2>
+                    <h4 align="justify">Ключ к изучению английской лексики - регулярные повторения
+                        изученных слов. Это приложение значительно облегчит этот процесс. Не надо искать
+                        переводчик, он у нас уже есть. Все, что требуется от Вас - это желание учиться.
+                        Используйте виртуальный словарь для быстрого первода английских слов, а чтобы вы не
+                        забыли их через пару дней, мы их запомним, спросим и даже поставим оценку.
+                    </h4>
+                </div>
+        </div>
+        </div>
+        <!--form group-->
+        <div class="col-lg-4" style="
+        background-color: #8EA3C1; color: #C5E1F7; font-size: 18pt; border-radius: 5%;">
+            <div class="p-0">
+
+
+        <div class="col-lg-4" style="
+        background-color: #8EA3C1; color: #C5E1F7; font-size: 18pt; border-radius: 5%;">
+            <div class="p-0">
+                <form method="post" action="{{ url_for('register') }}" role="form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                    {{ wtf.form_field(register_form.name) }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(register_form.email) }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(register_form.password) }}
+                </div>
+                <div class="form-group">
+                    {{ wtf.form_field(register_form.confirm) }}
+                </div>
+                 <div class="form-group" style="color: white; font-size: 14px;">
+                    {{ wtf.form_field(register_form.remember) }}
+                </div>
+                    {{ wtf.form_field(register_form.submit) }}
+                </form>
+
+ <!-- Small modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sm">Я уже с вами</button>
+                    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-sm">
+
+                        <div class="modal-content">
+                            <div class="p-3">
+                            <form method="post" action="{{url_for('log_in')}}" >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <div class="form-group" style="color: #8EA3C1">
+                                    <!--<label for="start_page_login" style="color: #8EA3C1">login</label>-->
+                                  <!--<input name="login" type="text" id="start_page_login" class="form-control" placeholder="Login">-->
+                                {{ wtf.form_field(login_form.email) }}
+                                </div>
+                                <div class="form-group" style="color: #8EA3C1">
+                                    <!--<label for="start_page_password" style="color: #8EA3C1">password</label>-->
+                                    <!--<input name="password" type="text" id="start_page_password" class="form-control" placeholder="Password">-->
+                                {{ wtf.form_field(login_form.password) }}
+                                </div>
+                                <div class="form-group" style="color: #8EA3C1; font-size: 14px;">
+                                    {{ wtf.form_field(login_form.remember) }}
+                                </div>
+                                <button type="submit" class="btn btn-info">Войти</button>
+                            </form>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+            </div>
+        </div>
+
+
+
+
+
+ <!-- Small modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sm">Я уже с вами</button>
+                    <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-sm">
+
+                        <div class="modal-content">
+                            <div class="p-3">
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

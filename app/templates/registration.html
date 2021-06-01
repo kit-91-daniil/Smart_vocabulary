@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block body %}
+<h2>Hello on register page!</h2>
+{% if note  %}
+{{ note }}
+{% endif %}
+<p>To pass registration enter your personal datas!</p>
+<form method="post" action="{{url_for('registration')}}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<p>Enter your name, please.</p>
+<input name="name" type="text"><br>
+<p>Enter your surname, please.</p>
+<input name="surname" type="text"><br>
+<p>Enter your login, please.</p>
+<input name="login" type="text"><br>
+<p>Enter your password, please.</p>
+<input name="password1" type="password"><br>
+    <p>Repeat your password, please.</p>
+<input name="password2" type="password"><br>
+    <button type="submit"><b>register</b></button>
+    <a href="{{ url_for('entry_page') }}">Back to main page</a>
+</form>
+{% endblock %}
