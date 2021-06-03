@@ -1,0 +1,6 @@
+/app/static/*
+!app/static/css/
+__pycache__
+/venv/
+
+
