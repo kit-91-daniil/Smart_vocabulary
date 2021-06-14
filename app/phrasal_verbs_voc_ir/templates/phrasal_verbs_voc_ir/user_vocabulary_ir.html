@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+{{ super() }}
+{% from "ir_voc/_form_helper.html" import render_form_field %}
+    <h1 class="ml-2">Словарь</h1>
+
+{% if user_words_pagin_obj_ir %}
+    <div class="p-3">
+        <div class="row justify-content-between">
+            <div class="col">
+                <form method="post" action="{{url_for('ir_voc.search_word_user_voc',
+                page_num=user_words_pagin_obj_ir.page,
+                translation_available=translation_available)}}" >
+                    {{ word_to_search_form.hidden_tag() }}
+                    <div class="form-group" style="font-weight: 800; font-size: 20px;">
+                        {{ render_form_field(word_to_search_form.word) }}
+                        {{ word_to_search_form.submit(class="btn btn-info") }}
+                    </div>
+                </form>
+            </div>
+            <div class="col align-self-end">
+
+                {% if session["searching_word_ir"] %}
+
+                <div class="alert alert-success" style="font-weight: 700; font-size: 18px;">
+                    {{ session["searching_word_translation_ir"] }}
+                </div>
+                {% endif %}
+
+                <a href="{{ url_for('ir_voc.user_voc') }}"
+                class="btn btn-info" role="button" aria-pressed="true">Назад к переводчику</a>
+            </div>
+        </div>
+
+        <div class="row pt-3">
+
+            <div class="col" style="color: #013580; font-weight: 600; font-size: 18px;">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Номер п/п</th>
+                      <th scope="col">Слово</th>
+                      <th scope="col">
+                    {% if translation_available == 0 %}
+                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_user_voc_ir',
+                        page_num=user_words_pagin_obj_ir.page, translation_available=1) }}"
+                        class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
+                      </a>
+                    {% else %}
+                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_user_voc_ir',
+                        page_num=user_words_pagin_obj_ir.page, translation_available=0) }}"
+                        class="btn btn-success mt-2" role="button" aria-pressed="true">Скрыть перевод
+                      </a>
+                    {% endif %}
+                      </th>
+                        <th>Время до повторения</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                  {% for i in user_words_pagin_obj_ir.items %}
+                    <tr>
+                      <th scope="row">{{ user_words_pagin_obj_ir.items.index(i)+1 }}</th>
+                      <td>{{ i.vocabulary.word }}</td>
+                        <td>
+                        {% if translation_available %}
+                            {{ i.vocabulary.translation }}
+                        {% endif %}
+                        </td>
+                        {% if i.time_to_repeat >= 0 %}
+                            <td> осталось {{ seconds_to_string(abs(i.time_to_repeat)) }} </td>
+                        {% else %}
+                            <td> пропущен {{ seconds_to_string(abs(i.time_to_repeat)) }} назад</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        {% for page in user_words_pagin_obj_ir.iter_pages(left_edge=3, right_edge=3,
+                        left_current=3, right_current=3) %}
+                            {% if page %}
+                                <li class="page-item" >
+                                    <a class="page-link"
+                                       href="{{ url_for('ir_voc.show_user_voc_ir', page_num=page,
+                                       translation_available=0) }}">{{page}}
+                                    </a>
+                                </li>
+                            {% else %}
+                                ....
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+
+    </div>
+    {% endif %}
+
+{% endblock %}

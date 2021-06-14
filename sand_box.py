@@ -55,9 +55,9 @@ def every_possible_sum(number):
 # print(every_possible_sum(1234))
 
 
-app = create_app()
-app_ctx = app.app_context()
-app_ctx.push()
+# app = create_app()
+# app_ctx = app.app_context()
+# app_ctx.push()
 
 
 def adding_words(limit, offset):
@@ -71,7 +71,7 @@ def adding_words(limit, offset):
                                 )
         db.session.add(iw_inst)
     db.session.commit()
-    return "words were succesfully added"
+    return "words were successfully added"
 
 
 def cleaning_the_vocabulary(user_id):
@@ -89,3 +89,13 @@ def summmm(a, b):
     return a + b
 
 # print(summmm(3,4))
+
+
+def search_pattern_creator(verb):
+    verb_arr = [f"%{i}" for i in verb.split()]
+    res_patt = "".join(verb_arr) + "%"
+    return res_patt
+
+
+# str1 = "Hello from users"
+# search_pattern_creator(str1)

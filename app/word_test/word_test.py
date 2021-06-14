@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, session, redirect, request, url_for
 from flask_security import current_user, login_required
-from app.word_test.working_test import TestChecker, check_answer
+from app.word_test.working_test import WordsTestCreator, check_answer
 from app.word_test.forms import AnswerForm
 
 word_test_bp = Blueprint("word_test_bp", __name__, template_folder="templates",
@@ -11,7 +11,7 @@ word_test_bp = Blueprint("word_test_bp", __name__, template_folder="templates",
 @word_test_bp.route("/pass_test/<test_type>/<int:words_quantity>")
 @login_required
 def pass_test(test_type, words_quantity=10):
-    test_checker_inst = TestChecker(current_user)
+    test_checker_inst = WordsTestCreator(current_user)
     test_checker_inst.words_quantity = words_quantity
     words_translations_list = test_checker_inst.test_object_creating(test_type)
     session["test_type"] = test_type
@@ -20,10 +20,16 @@ def pass_test(test_type, words_quantity=10):
     return redirect(url_for("word_test_bp.word_test", word_number=0))
 
 
+@word_test_bp.route("/pass_verbs_test/<test_type>/<int: words_quantity>")
+@login_required
+def pass_verbs_test(test_type: str, words_quantity: int = 10):
+    pass
+
+
 @word_test_bp.route("/word_test/<int:word_number>", methods=["GET", "POST"])
 @login_required
 def word_test(word_number):
-    test_checker_inst = TestChecker(current_user)
+    test_checker_inst = WordsTestCreator(current_user)
     answer_form = AnswerForm(request.form)
     test_len = len(session["words_translations_test"])
     if request.method == "POST":

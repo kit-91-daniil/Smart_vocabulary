@@ -89,5 +89,4 @@ def phrase_verbs_changing(file, file_changed):
 if __name__ == "__main__":
     # vocabulary_fill(english_words_path)
     user_voc_fill_from_text_file("dan2@mail.ru", english_words_path, 81, 10)
-    # pass
     # phrase_verbs_changing(phrase_verbs_path, phrase_verbs_changed_path)

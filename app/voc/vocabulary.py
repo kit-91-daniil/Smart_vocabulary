@@ -29,10 +29,10 @@ def add_word():
         vocabulary_actions = VocabularyActions(current_user)
         translating_result_voc_obj = vocabulary_actions.new_word(word_to_translate)
         message = translating_result_voc_obj.message
-        if message == Messages.word_was_added_succesfully:
+        if message == Messages.word_was_added_successfully:
             session["translating_result"] = translating_result_voc_obj.new_word_voc_inst.translation
             session["new_word"] = word_to_translate
-            message_string = flashed_messages_dict[Messages.word_was_added_succesfully].\
+            message_string = flashed_messages_dict[Messages.word_was_added_successfully].\
                 format(word=word_to_translate)
             flash(message_string, category="info")
         elif message == Messages.internet_disconnected:
@@ -61,8 +61,8 @@ def delete_word():
         if deleting_word_result == Messages.word_not_available_in_user_voc:
             deleting_message = flashed_messages_dict[Messages.word_not_available_in_user_voc]
             flash(message=deleting_message, category="info")
-        elif deleting_word_result == Messages.word_was_deleted_succesfully:
-            deleting_message = flashed_messages_dict[Messages.word_was_deleted_succesfully].\
+        elif deleting_word_result == Messages.word_was_deleted_successfully:
+            deleting_message = flashed_messages_dict[Messages.word_was_deleted_successfully].\
                 format(word=word_to_delete)
             flash(deleting_message, category="info")
         return redirect(url_for("voc.user_voc"))

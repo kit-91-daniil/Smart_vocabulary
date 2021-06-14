@@ -33,6 +33,7 @@ def create_app(config_class=Config):
     from app.voc.vocabulary import voc
     from app.word_test.word_test import word_test_bp
     from app.main.main_bp import main
+    from app.phrasal_verbs_voc_ir.phr_verbs_vocabulary import phrasal_verbs_voc_ir
     from app.error_pages.error_pages import error_403, \
         error_404, error_500, error_pages_bp
 
@@ -40,6 +41,7 @@ def create_app(config_class=Config):
     app.register_blueprint(ir_voc, url_prefix="/ir_voc")
     app.register_blueprint(word_test_bp, url_prefix="/word_test")
     app.register_blueprint(main, url_prefix="/main")
+    app.register_blueprint(phrasal_verbs_voc_ir, url_prefix="/phrasal_verbs_voc_ir")
     app.register_blueprint(error_pages_bp, url_prefix="/")
     app.register_error_handler(403, error_403)
     app.register_error_handler(404, error_404)

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import Form, StringField, SubmitField, PasswordField, BooleanField
-from wtforms.validators import EqualTo, InputRequired, Length, Regexp
+from wtforms import StringField, SubmitField
+from wtforms.validators import InputRequired, Length, Regexp
 
 
 class WordAddInputForm(FlaskForm):

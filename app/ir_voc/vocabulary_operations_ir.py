@@ -6,7 +6,7 @@ from app.translation import translate_word, TranslatorMessages
 from app.time_functions import next_quest_time
 from app.models import Vocabulary, IntervalWords, LearnedWords
 
-new_word_add_ir = namedtuple("new_word_add_nt", "new_word_voc_inst message")
+new_word_add_ir = namedtuple("new_word_add_ir", "new_word_voc_inst message")
 
 # from sqlalchemy import exc as fa_exc
 # except fa_exc.IntegrityError:
@@ -18,8 +18,8 @@ class MessagesIR(Enum):
     word_available_in_user_voc = auto()
     word_not_available_in_user_voc = auto()
     searching_word_not_available = auto()
-    word_was_deleted_succesfully = auto()
-    word_was_added_succesfully = auto()
+    word_was_deleted_successfully = auto()
+    word_was_added_successfully = auto()
     word_can_not_been_translated = auto()
     lost_word_progress_was_nullified = auto()
 
@@ -29,8 +29,8 @@ flashed_messages_dict_ir = {
     MessagesIR.word_available_in_user_voc: "Слово {word} уже есть в Вашем словаре",
     MessagesIR.word_not_available_in_user_voc: "Такого слова в словаре нет",
     MessagesIR.searching_word_not_available: "Такого слова в словаре нет",
-    MessagesIR.word_was_deleted_succesfully: "Слово {word} было успешно удалено",
-    MessagesIR.word_was_added_succesfully: "Слово {word} было успешно добавлено",
+    MessagesIR.word_was_deleted_successfully: "Слово {word} было успешно удалено",
+    MessagesIR.word_was_added_successfully: "Слово {word} было успешно добавлено",
     MessagesIR.word_can_not_been_translated: "Слово {word} не может быть переведено",
     MessagesIR.lost_word_progress_was_nullified: "Прогресс изучения выбранных слов обнулен"
 }
@@ -46,7 +46,7 @@ class VocabularyActionsIR:
         """Checks for word availability in vocabulary"""
         return Vocabulary.query.filter(Vocabulary.word == word).first()
 
-    def check_user_voc_for_word_availability(self, word: str) -> object or False:
+    def check_user_voc_for_word_availability(self, word: str) -> Vocabulary or False:
         """Checks for word availability in user's vocabulary. Use the generator."""
         user_voc_words = (i.vocabulary.word for i in self.user.interval_words.all())
         user_voc_inst_word = Vocabulary.query.filter(Vocabulary.word == word).first()
@@ -82,7 +82,7 @@ class VocabularyActionsIR:
                 db.session.add(words_inst_new_word)
                 db.session.commit()
             return new_word_add_ir(new_word_voc_inst=voc_inst_new_word,
-                                   message=MessagesIR.word_was_added_succesfully
+                                   message=MessagesIR.word_was_added_successfully
                                    )
         else:
             """Need to translator by the translator"""
@@ -100,7 +100,7 @@ class VocabularyActionsIR:
                                                     )
                 db.session.add_all([voc_inst_new_word, words_inst_new_word])
                 db.session.commit()
-                return new_word_add_ir(voc_inst_new_word, MessagesIR.word_was_added_succesfully)
+                return new_word_add_ir(voc_inst_new_word, MessagesIR.word_was_added_successfully)
             elif translator_output_message == TranslatorMessages.can_not_been_translated:
                 """Incorrect symbols or Too long result"""
                 return new_word_add_ir(None, MessagesIR.word_can_not_been_translated)
@@ -124,7 +124,7 @@ class VocabularyActionsIR:
                     first()
                 db.session.delete(assoc_inst_word_to_delete)
                 db.session.commit()
-            return MessagesIR.word_was_deleted_succesfully
+            return MessagesIR.word_was_deleted_successfully
 
     def show_user_words(self, page_num):
         """Returns pagination object of all words in user vocabulary,

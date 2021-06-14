@@ -4,7 +4,7 @@ from app.translation import translate_word, TranslatorMessages
 from collections import namedtuple
 from enum import Enum, auto
 
-new_word_add = namedtuple("new_word_add_nt", "new_word_voc_inst message")
+new_word_add = namedtuple("new_word_add", "new_word_voc_inst message")
 
 # from sqlalchemy import exc as fa_exc
 # except fa_exc.IntegrityError:
@@ -16,8 +16,8 @@ class Messages(Enum):
     word_available_in_user_voc = auto()
     word_not_available_in_user_voc = auto()
     searching_word_not_available = auto()
-    word_was_deleted_succesfully = auto()
-    word_was_added_succesfully = auto()
+    word_was_deleted_successfully = auto()
+    word_was_added_successfully = auto()
     word_can_not_been_translated = auto()
 
 
@@ -26,8 +26,8 @@ flashed_messages_dict = {
     Messages.word_available_in_user_voc: "Слово {word} уже есть в Вашем словаре",
     Messages.word_not_available_in_user_voc: "Такого слова в словаре нет",
     Messages.searching_word_not_available: "Такого слова в словаре нет",
-    Messages.word_was_deleted_succesfully: "Слово {word} было успешно удалено",
-    Messages.word_was_added_succesfully: "Слово {word} было успешно добавлено",
+    Messages.word_was_deleted_successfully: "Слово {word} было успешно удалено",
+    Messages.word_was_added_successfully: "Слово {word} было успешно добавлено",
     Messages.word_can_not_been_translated: "Слово {word} не может быть переведено"
 }
 
@@ -70,7 +70,7 @@ class VocabularyActions:
                 words_inst_new_word = Words(user=self.user, vocabulary=voc_inst_word)
                 db.session.add(words_inst_new_word)
                 db.session.commit()
-                return new_word_add(voc_inst_word, Messages.word_was_added_succesfully)
+                return new_word_add(voc_inst_word, Messages.word_was_added_successfully)
         else:
             """Need to translate by the translator"""
             translator_output_nt = translate_word(word_to_add)
@@ -83,7 +83,7 @@ class VocabularyActions:
                 words_inst_new_word = Words(user=self.user, vocabulary=voc_inst_new_word)
                 db.session.add_all([voc_inst_new_word, words_inst_new_word])
                 db.session.commit()
-                return new_word_add(voc_inst_new_word, Messages.word_was_added_succesfully)
+                return new_word_add(voc_inst_new_word, Messages.word_was_added_successfully)
             elif translator_output_message == TranslatorMessages.can_not_been_translated:
                 """Incorrect symbols or Too long result"""
                 return new_word_add(None, Messages.word_can_not_been_translated)
@@ -106,7 +106,7 @@ class VocabularyActions:
                     first()
                 db.session.delete(assoc_inst_word_to_delete)
                 db.session.commit()
-            return Messages.word_was_deleted_succesfully
+            return Messages.word_was_deleted_successfully
 
     def show_user_words(self, page_num):
         user_voc_pagin_obj = self.user.words.order_by(db.desc(Words.addition_time)). \
