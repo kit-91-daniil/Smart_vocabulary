@@ -1,11 +1,27 @@
 from collections import namedtuple
 from datetime import datetime, timedelta
+from dataclasses import dataclass
+from flask import current_app
 from enum import Enum, auto
+from random import shuffle
+from sqlalchemy import exc as sa_exc
 from app import db
 from app.time_functions import next_quest_time
 from app.models import PhrasalVerbsVocabulary, LearnedPhrasalVerbs, IntervalPhrasalVerbs
-
 phr_verb_ir_operation_result = namedtuple("phr_verb_ir_operation_result", "new_verb_voc_inst message")
+
+
+@dataclass
+class VerbAddingResultDC:
+    phrasal_verb: str
+    translation: str
+    is_success: bool
+
+
+@dataclass
+class VerbsFillingResultDC:
+    verbs_transl_list: list
+    count: int
 
 
 # from sqlalchemy import exc as fa_exc
@@ -17,26 +33,39 @@ class MessagesPhrasalVerbsIR(Enum):
     internet_disconnected = auto()
     phrs_verb_available_in_user_voc = auto()
     phrs_verb_not_available_in_user_voc = auto()
-    searching_phrs_verb_not_available = auto()
+    searched_phrs_verb_not_available = auto()
     phrs_verb_was_deleted_successfully = auto()
     phrs_verb_was_added_successfully = auto()
     lost_phrs_verb_progress_was_nullified = auto()
+    user_vocabulary_is_empty = auto()
+    verbs_were_added_successfully = auto()
+    no_more_verbs_to_add = auto()
+    lost_verbs_successful_restoring = auto()
+    lost_verbs_restoring_exception = auto()
+    verbs_vocabulary_was_updated = auto()
 
 
 flashed_messages_dict_phrs_vrb_ir = {
     MessagesPhrasalVerbsIR.internet_disconnected: "Проверьте подключение к интернету",
     MessagesPhrasalVerbsIR.phrs_verb_available_in_user_voc: "Фразовый глагол {verb} уже есть в Вашем словаре",
     MessagesPhrasalVerbsIR.phrs_verb_not_available_in_user_voc: "Фразового глагола {verb} в словаре нет",
-    MessagesPhrasalVerbsIR.searching_phrs_verb_not_available: "Фразового глагола {verb} в словаре нет",
+    MessagesPhrasalVerbsIR.searched_phrs_verb_not_available: "Фразового глагола {verb} в словаре нет",
     MessagesPhrasalVerbsIR.phrs_verb_was_deleted_successfully: "Фразовый глагол {verb} был успешно удален из "
                                                                "Вашего словаря",
     MessagesPhrasalVerbsIR.phrs_verb_was_added_successfully: "Фразовый глагол {verb} был успешно добавлен",
-    MessagesPhrasalVerbsIR.lost_phrs_verb_progress_was_nullified: "Прогресс изучения выбранных глаголов обнулен"
+    MessagesPhrasalVerbsIR.lost_phrs_verb_progress_was_nullified: "Прогресс изучения выбранных глаголов обнулен",
+    MessagesPhrasalVerbsIR.user_vocabulary_is_empty: "Ваш словарь пуст. Добавьте что-нибудь.",
+    MessagesPhrasalVerbsIR.verbs_were_added_successfully: "Новые слова были добавлены в Ваш словарь {count}",
+    MessagesPhrasalVerbsIR.no_more_verbs_to_add: "Все известные нам фразовые глаголы уже в Вашем словаре",
+    MessagesPhrasalVerbsIR.lost_verbs_successful_restoring: "Прогресс изучения пропущенных слов восстановлен",
+    MessagesPhrasalVerbsIR.lost_verbs_restoring_exception: "Ошибка восстановления прогресса пропущенных слов",
+    MessagesPhrasalVerbsIR.verbs_vocabulary_was_updated: "Словарь фразовых глаголов пополнен {count}",
 }
 
 
 class PhrasalVerbsVocabularyActionsIR:
     def __init__(self, user):
+        self.phrasal_verb_text_file = current_app.config.get('PHRASAL_VOCABULARY_PATH')
         self.user = user
         self.repeating_time = None
 
@@ -55,12 +84,13 @@ class PhrasalVerbsVocabularyActionsIR:
         phrs_verb_pattern = self.search_pattern_creator(phrs_verb)
         return PhrasalVerbsVocabulary.query.filter(PhrasalVerbsVocabulary.key_word.like(phrs_verb_pattern)).first()
 
-    def verb_avail_in_user_voc(self, phrs_verb: str = None, verb_voc_inst: PhrasalVerbsVocabulary = None) \
+    def verb_available_in_user_voc(self, phrs_verb: str = None, verb_voc_inst: PhrasalVerbsVocabulary = None) \
             -> IntervalPhrasalVerbs or None:
         """Checks for word availability in user's vocabulary. Use the generator."""
         phrs_verb_voc_inst = self.verb_available_in_voc(phrs_verb) if phrs_verb else verb_voc_inst
         return IntervalPhrasalVerbs.query.filter_by(user_id=self.user.id,
-                                                    word_id=phrs_verb_voc_inst.id).first()
+                                                    word_id=phrs_verb_voc_inst.id).first() if phrs_verb_voc_inst \
+            else None
 
     def verb_addition(self, verb_to_add: str, status=1):
         """Checks for phrasal verb availability in both vocabularies. If verb available
@@ -74,7 +104,7 @@ class PhrasalVerbsVocabularyActionsIR:
         verb_exists_in_voc = self.verb_available_in_voc(verb_to_add)
         if verb_exists_in_voc:
             """Phrasal verb exists in user vocabulary returns PhrasalVerbsVocabulary instance and success message"""
-            user_voc_verb_inst = self.verb_avail_in_user_voc(verb_voc_inst=verb_exists_in_voc)
+            user_voc_verb_inst = self.verb_available_in_user_voc(verb_voc_inst=verb_exists_in_voc)
             if user_voc_verb_inst:
                 return phr_verb_ir_operation_result(new_verb_voc_inst=verb_exists_in_voc,
                                                     message=MessagesPhrasalVerbsIR.phrs_verb_available_in_user_voc
@@ -90,7 +120,7 @@ class PhrasalVerbsVocabularyActionsIR:
                 db.session.add(words_inst_new_word)
                 db.session.commit()
             return phr_verb_ir_operation_result(new_verb_voc_inst=verb_exists_in_voc,
-                                                message=MessagesPhrasalVerbsIR.word_was_added_successfully
+                                                message=MessagesPhrasalVerbsIR.phrs_verb_was_added_successfully
                                                 )
         else:
             """Phrasal verb doesn't exists in vocabulary returns vocabulary instance and unavailable message"""
@@ -101,7 +131,7 @@ class PhrasalVerbsVocabularyActionsIR:
         in user's vocabulary it deletes it and returns message about successful deleting.
         In another case returns message informed about word absent.
         """
-        phrs_verb_to_del_voc_inst = self.verb_avail_in_user_voc(phrs_verb_to_delete)
+        phrs_verb_to_del_voc_inst = self.verb_available_in_user_voc(phrs_verb_to_delete)
         if not phrs_verb_to_del_voc_inst:
             return MessagesPhrasalVerbsIR.phrs_verb_not_available_in_user_voc
         else:
@@ -121,10 +151,11 @@ class PhrasalVerbsVocabularyActionsIR:
             paginate(per_page=10, page=page_num, error_out=True)
         return user_phrs_verb_voc_pagin_obj
 
-    def search_verb_in_user_voc(self, phrs_verb) -> PhrasalVerbsVocabulary or None:
+    def search_verb_in_user_voc(self, phrasal_verb) -> PhrasalVerbsVocabulary or None:
         """Check if the word is available at user vocabulary.
         If true, returns the Vocabulary object else, return None"""
-        return self.verb_avail_in_user_voc(phrs_verb).vocabulary
+        phrasal_verbs_vocabulary_inst = self.verb_available_in_user_voc(phrasal_verb)
+        return phrasal_verbs_vocabulary_inst.vocabulary if phrasal_verbs_vocabulary_inst else None
 
     def next_quest_sec_calcul(self):
         """The function calculates  for every word in user's vocabulary
@@ -133,7 +164,7 @@ class PhrasalVerbsVocabularyActionsIR:
         If a TypeError is raised, all the instances, where repeating_time is None are deleted.
         """
         try:
-            for iw_inst in self.user.interval_words.all():
+            for iw_inst in self.user.interval_phrasal_verbs.all():
                 iw_inst.time_to_repeat = (iw_inst.repeating_time - datetime.now()). \
                     total_seconds()
                 db.session.add(iw_inst)
@@ -165,7 +196,7 @@ class PhrasalVerbsVocabularyActionsIR:
         missing_test_obj = self.user.interval_phrasal_verbs. \
             filter(IntervalPhrasalVerbs.time_to_repeat <= 0). \
             filter(IntervalPhrasalVerbs.time_to_repeat >= time_for_losing_test.__neg__()). \
-            order_by(IntervalPhrasalVerbs.time_to_repeat.desc())
+            order_by(IntervalPhrasalVerbs.time_to_repeat)
         near_test_obj = self.user.interval_phrasal_verbs. \
             filter(IntervalPhrasalVerbs.time_to_repeat <= near_test_time). \
             filter(IntervalPhrasalVerbs.time_to_repeat > 0)
@@ -179,7 +210,7 @@ class PhrasalVerbsVocabularyActionsIR:
         Function returns pagination_object with words per page equal 10.
         """
         near_test_time = timedelta(hours=2).total_seconds()
-        near_phrs_verbs_pagin_obj = self.user.interval_words. \
+        near_phrs_verbs_pagin_obj = self.user.interval_phrasal_verbs. \
             filter(IntervalPhrasalVerbs.time_to_repeat <= near_test_time). \
             paginate(per_page=10, page=page_num, error_out=True)
         return near_phrs_verbs_pagin_obj
@@ -230,6 +261,93 @@ class PhrasalVerbsVocabularyActionsIR:
             db.session.add(iw_inst)
         db.session.commit()
         return True
+
+    def phrasal_verbs_list_creating_from_text_file(self):
+        with open(self.phrasal_verb_text_file, "r") as file:
+            phrasal_verbs_list = [
+                [sentence.strip() for sentence in line[1:].split(" = ")]
+                for line in file.readlines() if line.startswith("*")
+            ]
+        return phrasal_verbs_list
+
+    def phrasal_verbs_vocabulary_populating_from_text_file(self):
+        phrasal_verbs_list = self.phrasal_verbs_list_creating_from_text_file()
+        number = 0
+        for verb in phrasal_verbs_list:
+            if len(verb) == 5 and not PhrasalVerbsVocabulary.query.filter(
+                    PhrasalVerbsVocabulary.phrasal_verb == verb[0],
+                    PhrasalVerbsVocabulary.translation == verb[2]
+            ).all():
+                phrasal_verb_vocabulary_inst = PhrasalVerbsVocabulary(
+                    phrasal_verb=verb[0], key_word=verb[1], translation=verb[2],
+                    description=verb[3], example=verb[4],
+                )
+                try:
+                    db.session.add(phrasal_verb_vocabulary_inst)
+                    db.session.commit()
+                    number += 1
+                except sa_exc.IntegrityError:
+                    db.session.rollback()
+                    continue
+            else:
+                continue
+        else:
+            return number
+
+    def verb_addition_to_user_verbs_table(self, verb_id_to_add, status=1) -> IntervalPhrasalVerbs or False:
+        repeating_time = next_quest_time(status)
+        verb_vocabulary_instance = PhrasalVerbsVocabulary.query.get(verb_id_to_add)
+        try:
+            new_verb_inst = IntervalPhrasalVerbs(user=self.user, status=status,
+                                                 vocabulary=verb_vocabulary_instance,
+                                                 repeating_time=repeating_time,
+                                                 addition_time=datetime.utcnow())
+            db.session.add(new_verb_inst)
+            db.session.commit()
+        except sa_exc:
+            db.session.rollback()
+            return VerbAddingResultDC(verb_vocabulary_instance.phrasal_verb,
+                                      verb_vocabulary_instance.translation, False)
+
+        return VerbAddingResultDC(verb_vocabulary_instance.phrasal_verb,
+                                  verb_vocabulary_instance.translation, True)
+
+    def user_verbs_vocabulary_fill(self, count: int = 10):
+        successful_added_verbs = 0
+        verbs_translations_list = []
+        if not self.user:
+            return False
+        all_verbs = [verb.id for verb in PhrasalVerbsVocabulary.query.all()]
+        all_users_verbs = db.session.query(IntervalPhrasalVerbs, PhrasalVerbsVocabulary.id).\
+            filter_by(user_id=self.user.id).\
+            join(PhrasalVerbsVocabulary, IntervalPhrasalVerbs.word_id == PhrasalVerbsVocabulary.id).all()
+        all_users_verbs_id = [verb.id for verb in all_users_verbs]
+        verbs_id_to_add = list(set(all_verbs).difference(all_users_verbs_id))
+        shuffle(verbs_id_to_add)
+        """Verb's ids to add to the user's table"""
+        for verb_id in verbs_id_to_add:
+            verb_adding_result = self.verb_addition_to_user_verbs_table(verb_id)
+            if not verb_adding_result.is_success:
+                continue
+            successful_added_verbs += 1
+            verbs_translations_list.append((verb_adding_result.phrasal_verb, verb_adding_result.translation))
+            if successful_added_verbs == count:
+                break
+        return VerbsFillingResultDC(verbs_translations_list, successful_added_verbs)
+
+    def restore_lost_verbs_handler(self) -> bool:
+        """For all of the lost verbs sets repeating_time = datetime.now(),
+        returns True in success case or False if sqlalchemy exception was raised."""
+        lost_verbs = self.user.interval_phrasal_verbs.filter(IntervalPhrasalVerbs.time_to_repeat < -86400).all()
+        for verb in lost_verbs:
+            verb.repeating_time = datetime.now()
+            db.session.add(verb)
+        try:
+            db.session.commit()
+            return True
+        except sa_exc:
+            db.session.rollback()
+            return False
 
 
 """next_quest_sec_calcul description

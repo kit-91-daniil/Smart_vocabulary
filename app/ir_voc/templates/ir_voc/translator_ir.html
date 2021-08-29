@@ -27,7 +27,7 @@
                     Здесь Вы можете пройти тестирование. Слова будут выбраны из словаря случайно.
                       Все слова, представленные в тесте изучаются Вами по системе интеральных повторений.
                      <a href="{{ url_for('word_test_bp.pass_test',
-                     test_type='random_interval', words_quantity=10) }}"
+                     test_type='random_interval', words_count=10) }}"
                         class="btn btn-info mt-2" role="button" aria-pressed="true">
                          Пройти тестирование
                      </a>
@@ -72,7 +72,7 @@
                        </a>
 
                        <a href="{{ url_for('word_test_bp.pass_test', test_type='near',
-                       words_quantity=10) }}"
+                       words_count=10) }}"
                        class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">Пройти тестирование
                        </a>
 
@@ -114,7 +114,7 @@
                             {{ seconds_to_string(words_status_dict["missing_test_obj"].first().time_to_repeat) }}
                         </a>
 
-                       <a href="{{ url_for('word_test_bp.pass_test', test_type='missing', words_quantity=10) }}"
+                       <a href="{{ url_for('word_test_bp.pass_test', test_type='missing', words_count=10) }}"
                        class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
                            Пройти тестирование
                        </a>
@@ -190,7 +190,7 @@
                             слов: {{ words_status_dict["learned_test_obj"].count() }}
                         </a>
 
-                        <a href="{{ url_for('word_test_bp.pass_test', test_type='learned', words_quantity=10) }}"
+                        <a href="{{ url_for('word_test_bp.pass_test', test_type='learned', words_count=10) }}"
                             class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
                             Пройти тестирование
                         </a>
@@ -264,7 +264,7 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                    {{ delete_word_form.submit(class="btn btn-info") }}
+                    {{ delete_word_form.submit(class="btn btn-primary") }}
                    <button type="reset" class="btn btn-primary">Очистить</button>
                     </div>
                     <div class="col">
@@ -277,9 +277,14 @@
             <div class="col">
                 <a style="width: 150px;" href="{{ url_for('ir_voc.show_user_voc_ir',
                 page_num=1, translation_available=0) }}"
-                   class="btn btn-info mt-2" role="button" aria-pressed="true">Словарь</a>
-            </div>
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true">Словарь</a>
 
+                <a style="width: 150px;" href="{{ url_for('ir_voc.add_random_words') }}"
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true"> + 10 глаголов</a>
+
+                <a style="width: 150px;" href="{{ url_for('ir_voc.update_vocabulary') }}"
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true"> Обновить</a>
+            </div>
         </div>
     </div>
 

@@ -1,16 +1,35 @@
 from collections import namedtuple
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum, auto
+from random import shuffle
+from sqlalchemy import exc as sa_exc
 from app import db
 from app.translation import translate_word, TranslatorMessages
 from app.time_functions import next_quest_time
 from app.models import Vocabulary, IntervalWords, LearnedWords
+from config import vocabulary_path
 
 new_word_add_ir = namedtuple("new_word_add_ir", "new_word_voc_inst message")
 
 # from sqlalchemy import exc as fa_exc
 # except fa_exc.IntegrityError:
 # sqlalchemy.exc.OperationalError: - Mysql connection not available
+
+
+@dataclass
+class WordAddingResultDC:
+    """word, translation, is_success"""
+    word: str
+    translation: str
+    is_success: bool
+
+
+@dataclass
+class WordsFillingResultDC:
+    """word_transl_list, count"""
+    words_transl_list: list
+    count: int
 
 
 class MessagesIR(Enum):
@@ -22,6 +41,12 @@ class MessagesIR(Enum):
     word_was_added_successfully = auto()
     word_can_not_been_translated = auto()
     lost_word_progress_was_nullified = auto()
+    user_vocabulary_is_empty = auto()
+    words_were_added_successfully = auto()
+    lost_words_successful_restoring = auto()
+    lost_words_restoring_exception = auto()
+    words_vocabulary_was_updated = auto()
+    words_adding_error = auto()
 
 
 flashed_messages_dict_ir = {
@@ -32,7 +57,13 @@ flashed_messages_dict_ir = {
     MessagesIR.word_was_deleted_successfully: "Слово {word} было успешно удалено",
     MessagesIR.word_was_added_successfully: "Слово {word} было успешно добавлено",
     MessagesIR.word_can_not_been_translated: "Слово {word} не может быть переведено",
-    MessagesIR.lost_word_progress_was_nullified: "Прогресс изучения выбранных слов обнулен"
+    MessagesIR.lost_word_progress_was_nullified: "Прогресс изучения выбранных слов обнулен",
+    MessagesIR.user_vocabulary_is_empty: "Ваш словарь пуст. Добавьте что-нибудь.",
+    MessagesIR.words_were_added_successfully: "Новые слова были добавлены в Ваш словарь {count}",
+    MessagesIR.words_adding_error: "Ошибка при добавлении новых слов в Ваш словарь",
+    MessagesIR.lost_words_successful_restoring: "Прогресс изучения пропущенных слов восстановлен",
+    MessagesIR.lost_words_restoring_exception: "Ошибка восстановления прогресса пропущенных слов",
+    MessagesIR.words_vocabulary_was_updated: "Словарь пополнен {count}",
 }
 
 
@@ -40,6 +71,7 @@ class VocabularyActionsIR:
     def __init__(self, user):
         self.user = user
         self.repeating_time = None
+        self.vocabulary_path = vocabulary_path
 
     @staticmethod
     def check_voc_for_word_availability(word):
@@ -243,6 +275,82 @@ class VocabularyActionsIR:
             db.session.add(iw_inst)
         db.session.commit()
         return True
+
+    def word_translation_list_creator_from_file(self):
+        """the file must have the following pattern:
+        word - translation;
+        """
+        with open(self.vocabulary_path) as text_file:
+            word_translation_list = [[sentence.strip() for sentence in line[1:].split(" - ")]
+                                     for line in text_file.readlines() if line.startswith("*")]
+        return word_translation_list
+
+    def update_vocabulary(self):
+        """Receives a word_translation arr and adds every words with it's translation to the vocabulary.
+        In case of duplicating, word will not be added"""
+        words_transl_list = self.word_translation_list_creator_from_file()
+        for w_tr_tpl in words_transl_list:
+            try:
+                new_voc_inst = Vocabulary(word=w_tr_tpl[0], translation=w_tr_tpl[1])
+                db.session.add(new_voc_inst)
+                db.session.commit()
+            except sa_exc.IntegrityError or IndexError:
+                db.session.rollback()
+        return True
+
+    def word_adding_to_user_table(self, word_id, status=1) -> WordAddingResultDC:
+        """Receive id of the word - Vocabulary.id and add new line to the association table
+        IntervalWords for current user"""
+        repeating_time = next_quest_time(status)
+        vocabulary_instance = Vocabulary.query.get(word_id)
+        try:
+            new_word_inst = IntervalWords(user=self.user, status=status,
+                                          vocabulary=vocabulary_instance,
+                                          repeating_time=repeating_time,
+                                          addition_time=datetime.utcnow())
+            db.session.add(new_word_inst)
+            db.session.commit()
+        except sa_exc.IntegrityError:
+            db.session.rollback()
+            return WordAddingResultDC(vocabulary_instance.word,
+                                      vocabulary_instance.translation, False)
+        return WordAddingResultDC(vocabulary_instance.word,
+                                  vocabulary_instance.translation, True)
+
+    def user_vocabulary_fill(self, count: int = 10):
+        successful_added_words = 0
+        words_translation_list = []
+        if not self.user:
+            return False
+        all_words_id = [word.id for word in Vocabulary.query.all()]
+        all_learned_word_ids = [word.word_id for word in LearnedWords.query.filter_by(user_id=self.user.id).all()]
+        all_user_word_ids = [word.word_id for word in IntervalWords.query.filter_by(user_id=self.user.id).all()]
+        word_ids_to_add = list(set(all_words_id).difference(all_user_word_ids + all_learned_word_ids))
+        shuffle(word_ids_to_add)
+        """Word's ids to add to the IntervalWords table for current user"""
+        for word_id in word_ids_to_add:
+            word_adding_result = self.word_adding_to_user_table(word_id)
+            if not word_adding_result.is_success:
+                continue
+            successful_added_words += 1
+            words_translation_list.append((word_adding_result.word, word_adding_result.translation))
+            if successful_added_words == count:
+                break
+        return WordsFillingResultDC(words_translation_list, successful_added_words)
+
+    def restore_lost_words_handler(self) -> bool:
+        """For all of the lost words update with repeating_time = datetime.now(),
+        returns True in success case or False if sqlalchemy exception was raised."""
+        lost_words = self.user.interval_words.filter(IntervalWords.time_to_repeat < -86400).all()
+        for word in lost_words:
+            word.repeating_time = datetime.now()
+            db.session.add(word)
+        try:
+            db.session.commit()
+            return True
+        except sa_exc:
+            db.session.rollback()
+            return False
 
 
 """next_quest_sec_calcul description

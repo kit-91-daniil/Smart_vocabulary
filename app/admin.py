@@ -3,7 +3,7 @@ from flask_security import current_user
 from flask import redirect, url_for, request
 from sqlalchemy import func
 from wtforms.validators import required, Length
-from app.models import User
+from app.models import User, IntervalPhrasalVerbs, IntervalWords
 
 
 class CustomStudentUser(ModelView):
@@ -99,11 +99,11 @@ class CustomAdminVoc(ModelView):
 
 
 class CustomAdminPhrasalVerbsVoc(ModelView):
-    column_list = ("phrasal_verb", "translation")
+    column_list = ("phrasal_verb", 'key_word', "translation", 'example')
     column_searchable_list = ("phrasal_verb", "translation")
     page_size = 50
     column_excluded_list = ["phrasal_verb", ]
-    column_editable_list = ['phrasal_verb', 'translation']
+    column_editable_list = ['phrasal_verb', 'key_word', 'translation', 'example']
     create_modal = True
     edit_modal = True
     form_excluded_columns = ["interval_users", "users", "learned_users"]
@@ -127,6 +127,72 @@ class CustomAdminPhrasalVerbsVoc(ModelView):
                 current_user.has_role("administrator"))
 
 
+class CustomAdminIntervalPhrasalVerbs(ModelView):
+    column_list = ("user_id", "word_id", "repeating_time", "time_to_repeat", "status")
+    column_searchable_list = ["word_id"]
+    page_size = 50
+    column_editable_list = ["repeating_time", "status"]
+    create_modal = True
+    edit_modal = True
+
+    form_args = {
+
+        "word_id": {
+            "label": "id of word",
+            "validators": [required()]
+        }
+    }
+
+    def get_count_query(self):
+        return self.session.query(func.count("*")).\
+            filter(IntervalPhrasalVerbs.user_id == current_user.id)
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("security.login"))
+
+    def is_accessible(self):
+        return current_user.is_active and current_user.is_authenticated and \
+               current_user.has_role("administrator")
+
+    def get_query(self):
+        return super(CustomAdminIntervalPhrasalVerbs, self).get_query(). \
+            filter(IntervalPhrasalVerbs.user_id == current_user.id).\
+            order_by(IntervalPhrasalVerbs.time_to_repeat)
+
+
+class CustomAdminIntervalWords(ModelView):
+    column_list = ("user_id", "word_id", "repeating_time", "time_to_repeat", "status")
+    column_searchable_list = ["word_id"]
+    page_size = 50
+    column_editable_list = ["repeating_time", "status"]
+    create_modal = True
+    edit_modal = True
+
+    form_args = {
+
+        "word_id": {
+            "label": "id of word",
+            "validators": [required()]
+        },
+    }
+
+    def get_count_query(self):
+        return self.session.query(func.count("*")).\
+            filter(IntervalWords.user_id == current_user.id)
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for("security.login"))
+
+    def is_accessible(self):
+        return current_user.is_active and current_user.is_authenticated and \
+               current_user.has_role("administrator")
+
+    def get_query(self):
+        return super(CustomAdminIntervalWords, self).get_query(). \
+            filter(IntervalWords.user_id == current_user.id).\
+            order_by(IntervalWords.time_to_repeat)
+
+
 class CustomAdminRole(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for("security.login"))
@@ -147,6 +213,7 @@ class CustomAdminRole(ModelView):
     #             abort(403)
     #         else:
     #             return self.inaccessible_callback(name, **kwargs)
+
 
 # class CustomUserView(ModelView):
 #     form = MyForm

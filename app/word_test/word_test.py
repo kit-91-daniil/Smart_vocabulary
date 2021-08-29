@@ -3,27 +3,22 @@ from flask_security import current_user, login_required
 from app.word_test.working_test import WordsTestCreator, check_answer
 from app.word_test.forms import AnswerForm
 
+
 word_test_bp = Blueprint("word_test_bp", __name__, template_folder="templates",
                          static_folder="static"
                          )
 
 
-@word_test_bp.route("/pass_test/<test_type>/<int:words_quantity>")
+@word_test_bp.route("/pass_test/<test_type>/<int:words_count>")
 @login_required
-def pass_test(test_type, words_quantity=10):
+def pass_test(test_type: str, words_count: int = 10):
     test_checker_inst = WordsTestCreator(current_user)
-    test_checker_inst.words_quantity = words_quantity
+    test_checker_inst.words_count = words_count
     words_translations_list = test_checker_inst.test_object_creating(test_type)
     session["test_type"] = test_type
     session["words_translations_test"] = words_translations_list
     session["right_answers_random_test"] = 0
     return redirect(url_for("word_test_bp.word_test", word_number=0))
-
-
-@word_test_bp.route("/pass_verbs_test/<test_type>/<int: words_quantity>")
-@login_required
-def pass_verbs_test(test_type: str, words_quantity: int = 10):
-    pass
 
 
 @word_test_bp.route("/word_test/<int:word_number>", methods=["GET", "POST"])
@@ -35,7 +30,8 @@ def word_test(word_number):
     if request.method == "POST":
         success_learned = None
         answer_to_check = answer_form.word.data.lower()
-        checking_result = check_answer(answer_to_check, word_number - 1, sim=0.8)
+        right_answer = session["words_translations_test"][word_number-1][1]
+        checking_result = check_answer(answer_to_check, right_answer, sim=0.8)
         answer_form.word.data = ""
         if checking_result == "right":
             session["right_answers_random_test"] += 1
@@ -45,7 +41,7 @@ def word_test(word_number):
                     session["words_translations_test"][word_number-1][2]
                 )
         if word_number >= test_len:
-            return render_template("word_test/results_test.html", test_len=test_len,
+            return render_template("word_test/words_test_result.html", test_len=test_len,
                                    checking_result=checking_result, round=round,
                                    word_number=word_number, answer_form=answer_form,
                                    success_learned=success_learned
@@ -53,7 +49,7 @@ def word_test(word_number):
     else:
         checking_result = None
         answer_form.word.data = ""
-    return render_template("word_test/word_test.html", test_len=test_len,
+    return render_template("word_test/words_test.html", test_len=test_len,
                            word_number=word_number, answer_form=answer_form,
                            checking_result=checking_result, round=round
                            )

@@ -26,12 +26,22 @@
                          style="border-radius: 2%; color: #013580; background-color: #C0E1F9;">
                         Здесь Вы можете пройти тестирование. Фразовые глаголы будут выбраны из словаря случайно.
                         Все глаголы, представленные в тесте изучаются по системе интеральных повторений.
-                        <a href="{{ url_for('word_test_bp.pass_test',
-                     test_type='random_interval', words_quantity=10) }}"
-                           class="btn btn-info mt-2" role="button" aria-pressed="true">
+                        <a href="{{ url_for('verb_test_bp.pass_verbs_test',
+                            verbs_test_type='random_interval_verbs', words_count=10) }}"
+                            class="btn btn-info mt-2" role="button" aria-pressed="true">
                             Пройти тестирование
                         </a>
+
+                        {% if current_user.has_role("administrator") %}
+                            <a href="{{ url_for('phrasal_verbs_voc_ir.update_phrasal_vocabulary') }}"
+                               class="btn btn-success btn-block mt-2" role="button" aria-pressed="true">
+                                Пополнить словарь
+                            </a>
+                        {%endif%}
+
                     </div>
+
+
                 </div>
 
             </div>
@@ -57,11 +67,12 @@
                     <div class="card-body"
                          style="border-radius: 2%; color: #013580;
                        background-color: #C0E1F9;">
-                        Повторение этих слов желательно выполнить как можно быстрее
 
                         {% if words_status_dict["near_test_obj"].count() %}
 
-                        <a href="{{ url_for('ir_voc.show_near_words', page_num=1, translation_available=0) }}"
+                        Повторение этих слов желательно выполнить как можно быстрее
+                        <a href="{{ url_for('phrasal_verbs_voc_ir.show_near_verbs', page_num=1,
+                        translation_available=0) }}"
                            class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
                             слов: {{ words_status_dict["near_test_obj"].count() }}
                         </a>
@@ -71,8 +82,8 @@
                             {{ seconds_to_string(words_status_dict["near_test_obj"].first().time_to_repeat) }}
                         </a>
 
-                        <a href="{{ url_for('word_test_bp.pass_test', test_type='near',
-                       words_quantity=10) }}"
+                        <a href="{{ url_for('verb_test_bp.pass_verbs_test', verbs_test_type='near_verbs',
+                       words_count=10) }}"
                            class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">Пройти тестирование
                         </a>
 
@@ -105,7 +116,8 @@
                         Вы пропустили опрос этих слов. Пройдите как можно быстрее тест, чтобы сохранить прогресс
                         изучения.
 
-                        <a href="{{ url_for('ir_voc.show_missing_words', page_num=1, translation_available=0) }}"
+                        <a href="{{ url_for('phrasal_verbs_voc_ir.show_missing_verbs', page_num=1,
+                        translation_available=0) }}"
                            class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
                             слов: {{ words_status_dict["missing_test_obj"].count() }}
                         </a>
@@ -115,7 +127,7 @@
                             {{ seconds_to_string(words_status_dict["missing_test_obj"].first().time_to_repeat) }}
                         </a>
 
-                        <a href="{{ url_for('word_test_bp.pass_test', test_type='missing', words_quantity=10) }}"
+                        <a href="{{ url_for('verb_test_bp.pass_verbs_test', verbs_test_type='missing_verbs', words_count=10) }}"
                            class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
                             Пройти тестирование
                         </a>
@@ -148,15 +160,24 @@
                         {% if words_status_dict["lost_test_obj"].count() %}
                         Вы не повторяли эти слова слишком давно. Цикл их изучения начнентся заново.
 
-                        <a href="{{ url_for('ir_voc.show_lost_words', page_num=1, translation_available=0) }}"
+                        <a href="{{ url_for('phrasal_verbs_voc_ir.show_lost_verbs', page_num=1,
+                        translation_available=0) }}"
                            class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
                             слов: {{ words_status_dict["lost_test_obj"].count() }}
                         </a>
 
-                        Опрос пропущен
-                        <a href="#" class="btn btn-success btn-block mt-2 disabled" role="button" aria-pressed="true">
+                        <a href="#" class="btn btn-danger btn-block mt-2 disabled" role="button" aria-pressed="true">
+                            Опрос пропущен
                             {{ seconds_to_string(words_status_dict["lost_test_obj"].first().time_to_repeat) }}
-                        </a> назад
+                            назад
+                        </a>
+
+                        {% if current_user.has_role("administrator") %}
+                        <a href="{{ url_for('phrasal_verbs_voc_ir.restore_lost_verbs') }}"
+                           class="btn btn-success btn-block mt-2" role="button" aria-pressed="true">
+                            Восстановить прогресс изучения
+                        </a>
+                        {%endif%}
 
                         {% endif %}
 
@@ -166,7 +187,7 @@
             <!--END LOST TEST-->
 
             <!--LEARNED WORD TEST-->
-            {% if words_status_dict["learned_test_obj"].count() %}
+
             <div class="card" style="background-color: #0D3A5B; color: #D6D3C9;">
 
                 <div class="card-header" id="headingLearned">
@@ -187,19 +208,19 @@
 
                         Вы полностью завершили изучение этих слов
 
-                        <a href="{{ url_for('ir_voc.show_learned_words', page_num=1, translation_available=0) }}"
+                        <a href="{{ url_for('phrasal_verbs_voc_ir.show_learned_verbs', page_num=1, translation_available=0) }}"
                            class="btn btn-info btn-block mt-2" role="button" aria-pressed="true">
                             слов: {{ words_status_dict["learned_test_obj"].count() }}
                         </a>
 
-                        <a href="{{ url_for('word_test_bp.pass_test', test_type='learned', words_quantity=10) }}"
+                        <a href="{{ url_for('verb_test_bp.pass_verbs_test', verbs_test_type='learned_verbs', words_count=10) }}"
                            class="btn btn-primary btn-block mt-2" role="button" aria-pressed="true">
                             Пройти тестирование
                         </a>
                     </div>
                 </div>
             </div>
-            {% endif %}
+
             <!--END LEARNED TEST-->
 
 
@@ -212,7 +233,7 @@
         <!--<img src="{{ url_for('static', filename='images/memory.jpg', _external=True) }}" class="align-self-center" alt="flag" height="250" width="250" style="border-radius: 50%;">-->
         <!--<div class="media-body m-3">-->
         <h2 style="text-align: center; font-size: 5vmin; color: teal;">
-            Словарь с интервальными повторениями</h2>
+            Словарь фразовых глаголов</h2>
         <h2 style="font-size: 4vmin; color: teal;">
             Фразовые глаголы - довольно сложная тема, но необходимая. Для того, чтобы эффективно
             общаться с носителями, нужно выучить хотя бы наиболее часто употребляемые из них.
@@ -227,7 +248,7 @@
     <div class="col-md-4 pt-2 "
          style="border: solid #9CB6D5; padding: 1%; border-radius: 5%; color: #013580; background-color: #C0E1F9;">
         <h3>Ваш персональный интервальный переводчик</h3>
-        <form method="post" action="{{url_for('ir_voc.add_word', _external=True)}}">
+        <form method="post" action="{{url_for('phrasal_verbs_voc_ir.add_word', _external=True)}}">
             {{ add_phrasal_verb_form.hidden_tag() }}
             <div class="form-group">
                 <div class="row">
@@ -235,12 +256,12 @@
                         {{ render_form_field(add_phrasal_verb_form.phrasal_verb) }}
                     </div>
                     <div class="col mt-4">
-                        {% if session["translating_result_ir"] %}
+                        {% if session["verb_translation_ir"] %}
                         <div id="translation_word" style="min-height: 50px; width: 200px;
                             height: auto; background-color: #0069D9; color: #FFFFFF;
                             border-radius: 5%; text-align: center; display: table-cell;
                             vertical-align: center; font-size: 24px;">
-                            {{ session["translating_result_ir"] }}
+                            {{ session["verb_translation_ir"] }}
                         </div>
                         {% endif %}
 
@@ -267,7 +288,7 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        {{ delete_phrasal_verb_form.submit(class="btn btn-info") }}
+                        {{ delete_phrasal_verb_form.submit(class="btn btn-primary") }}
                         <button type="reset" class="btn btn-primary">Очистить</button>
                     </div>
                     <div class="col">
@@ -278,12 +299,20 @@
 
         <div class="row">
             <div class="col">
-                <a style="width: 150px;" href="{{ url_for('ir_voc.show_user_voc_ir',
+                <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_user_voc_ir',
                 page_num=1, translation_available=0) }}"
-                   class="btn btn-info mt-2" role="button" aria-pressed="true">Словарь</a>
-            </div>
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true">Словарь</a>
 
+                <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.add_random_verbs', count=10) }}"
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true"> + 10 глаголов</a>
+
+                <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.update_phrasal_vocabulary', count=10) }}"
+                   class="btn btn-success mt-2 btn-lg" role="button" aria-pressed="true"> Обновить</a>
+            </div>
         </div>
+
+
+
     </div>
 
 </div>

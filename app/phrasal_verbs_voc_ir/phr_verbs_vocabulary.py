@@ -48,20 +48,20 @@ def add_word():
         if message == MessagesPhrasalVerbsIR.phrs_verb_was_added_successfully:
             session["verb_translation_ir"] = verb_addition_result.new_verb_voc_inst.translation
             session["new_verb_ir"] = verb_to_translate
-            message_string = flashed_messages_dict_phrs_vrb_ir[MessagesPhrasalVerbsIR.phrs_verb_was_added_successfully] \
-                .format(verb=verb_to_translate)
+            message_string = flashed_messages_dict_phrs_vrb_ir[
+                MessagesPhrasalVerbsIR.phrs_verb_was_added_successfully].format(verb=verb_to_translate)
             flash(message_string, category="info")
         else:
             message_string = flashed_messages_dict_phrs_vrb_ir[message].format(verb=verb_to_translate)
             flash(message_string, category="info")
-        return redirect(url_for("ir_voc.user_voc"))
+        return redirect(url_for("phrasal_verbs_voc_ir.user_voc"))
     else:
         verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
         verb_vocabulary_actions.next_quest_sec_calcul()
         words_status_dict = verb_vocabulary_actions.test_objects_creating()
-        result = render_template("ir_voc/phrasal_verbs_translator_ir.html",
-                                 add_word_form=add_verb_form,
-                                 delete_word_form=delete_verb_form,
+        result = render_template("phrasal_verbs_voc_ir/phrasal_verbs_translator_ir.html",
+                                 add_phrasal_verb_form=add_verb_form,
+                                 delete_phrasal_verb_form=delete_verb_form,
                                  words_status_dict=words_status_dict,
                                  type=type, seconds_to_string=seconds_to_russian_string,
                                  )
@@ -85,7 +85,7 @@ def delete_word():
             flash(message=deleting_message, category="info")
         elif deleting_verb_result == MessagesPhrasalVerbsIR.phrs_verb_was_deleted_successfully:
             deleting_message = flashed_messages_dict_phrs_vrb_ir[
-                MessagesPhrasalVerbsIR.word_was_deleted_successfully
+                MessagesPhrasalVerbsIR.phrs_verb_was_deleted_successfully
             ].format(verb=verb_to_delete)
             flash(deleting_message, category="info")
         return redirect(url_for("phrasal_verbs_voc_ir.user_voc"))
@@ -137,8 +137,8 @@ def search_verb_user_voc(page_num, translation_available):
             session["searching_verb_example_ir"] = searching_result.example
         else:
             search_message = flashed_messages_dict_phrs_vrb_ir[
-                MessagesPhrasalVerbsIR.searching_phrs_verb_not_available
-            ]
+                MessagesPhrasalVerbsIR.searched_phrs_verb_not_available
+            ].format(verb=verb_to_search)
             flash(search_message, category="info")
     return redirect(url_for("phrasal_verbs_voc_ir.show_user_voc_ir", page_num=page_num,
                             translation_available=translation_available))
@@ -173,7 +173,7 @@ def show_missing_verbs(page_num=1, translation_available=0):
 @phrasal_verbs_voc_ir.route("/lost_words/<int:page_num>/<int:translation_available>",
                             methods=["POST", "GET"])
 @login_required
-def show_lost_words(page_num=1, translation_available=0):
+def show_lost_verbs(page_num=1, translation_available=0):
     verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
     lost_verbs_pagin_obj = verb_vocabulary_actions.show_lost_verbs(page_num)
     return render_template("phrasal_verbs_voc_ir/words_to_repeat.html",
@@ -186,7 +186,7 @@ def show_lost_words(page_num=1, translation_available=0):
 @phrasal_verbs_voc_ir.route("/learned_words/<int:page_num>/<int:translation_available>",
                             methods=["POST", "GET"])
 @login_required
-def show_learned_words(page_num=1, translation_available=0):
+def show_learned_verbs(page_num=1, translation_available=0):
     verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
     learned_words_pagin_obj = verb_vocabulary_actions.show_learned_verbs(page_num)
     return render_template("phrasal_verbs_voc_ir/words_to_repeat.html",
@@ -196,6 +196,36 @@ def show_learned_words(page_num=1, translation_available=0):
                            )
 
 
+@phrasal_verbs_voc_ir.route("/add_random_verbs/<int:count>", methods=["GET"])
+@login_required
+def add_random_verbs(count: int = 10):
+    add_phrasal_verb_form = PhrasalVerbAddInputForm(phrasal_verb="")
+    delete_phrasal_verb_form = PhrasalVerbDeleteInputForm(phrasal_verb="")
+    verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
+    user_verbs_vocabulary_filling_result = verb_vocabulary_actions.user_verbs_vocabulary_fill(count)
+
+    user_verbs_vocabulary_filling_message = flashed_messages_dict_phrs_vrb_ir[
+        MessagesPhrasalVerbsIR.verbs_were_added_successfully
+    ].format(count=user_verbs_vocabulary_filling_result.count) \
+        if user_verbs_vocabulary_filling_result.count \
+        else flashed_messages_dict_phrs_vrb_ir[MessagesPhrasalVerbsIR.no_more_verbs_to_add]
+    flash(user_verbs_vocabulary_filling_message, category="info")
+
+    # For all the phrasal verbs are consisted in user's vocabulary calculate time to repeating
+    verb_vocabulary_actions.next_quest_sec_calcul()
+    words_status_dict = verb_vocabulary_actions.test_objects_creating()
+    result = render_template("phrasal_verbs_voc_ir/phrasal_verbs_translator_ir.html",
+                             add_phrasal_verb_form=add_phrasal_verb_form,
+                             delete_phrasal_verb_form=delete_phrasal_verb_form,
+                             words_status_dict=words_status_dict,
+                             seconds_to_string=seconds_to_russian_string,
+                             new_phrasal_verbs_list=user_verbs_vocabulary_filling_result.verbs_transl_list
+                             )
+    session["verb_translation_ir"] = None
+    session["new_verb_ir"] = None
+    return result
+
+
 @phrasal_verbs_voc_ir.route("/drop_down_progress/<int:page_num>", methods=["POST", "GET"])
 @login_required
 def drop_down_progress(page_num):
@@ -203,8 +233,38 @@ def drop_down_progress(page_num):
     verb_vocabulary_actions.drop_down_progress(page_num)
     message_string = flashed_messages_dict_phrs_vrb_ir[MessagesPhrasalVerbsIR.lost_phrs_verb_progress_was_nullified]
     flash(message_string, category="info")
-    return redirect(url_for("phrasal_verbs_voc_ir.user_voc", page_num=1,
+    return redirect(url_for("phrasal_verbs_voc_ir.show_user_voc_ir", page_num=1,
                             translation_available=0))
+
+
+@phrasal_verbs_voc_ir.route("/restore_lost_verbs", methods=["GET"])
+@login_required
+def restore_lost_verbs():
+    verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
+    if verb_vocabulary_actions.restore_lost_verbs_handler():
+        successful_restoring_message = flashed_messages_dict_phrs_vrb_ir[
+            MessagesPhrasalVerbsIR.lost_verbs_successful_restoring
+        ]
+        flash(successful_restoring_message, category="info")
+    else:
+        error_restoring_message = flashed_messages_dict_phrs_vrb_ir[
+            MessagesPhrasalVerbsIR.lost_verbs_restoring_exception
+        ]
+        flash(error_restoring_message, category="danger")
+    return redirect(url_for("phrasal_verbs_voc_ir.user_voc"))
+
+
+@phrasal_verbs_voc_ir.route("/update_phrasal_vocabulary", methods=["GET"])
+@login_required
+def update_phrasal_vocabulary():
+    verb_vocabulary_actions = PhrasalVerbsVocabularyActionsIR(current_user)
+    updated_verbs_count = verb_vocabulary_actions.phrasal_verbs_vocabulary_populating_from_text_file()
+    if updated_verbs_count:
+        successful_restoring_message = flashed_messages_dict_phrs_vrb_ir[
+            MessagesPhrasalVerbsIR.verbs_vocabulary_was_updated
+        ].format(count=updated_verbs_count)
+        flash(successful_restoring_message, category="info")
+    return redirect(url_for("phrasal_verbs_voc_ir.user_voc"))
 
 
 if __name__ == "__main__":

@@ -1,3 +1,9 @@
+import os
+
+phrasal_vocabulary_path = os.path.join(os.getcwd(), "app/txt_vocabularies/phrasal_verbs_vocabulary")
+vocabulary_path = os.path.join(os.getcwd(), "app/txt_vocabularies/english_words")
+
+
 class Config:
     SECRET_KEY = 'r165er5efdytwefd56qre65wqfdty'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
@@ -35,7 +41,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = "mysql+mysqlconnector://root:" \
                               "123456@localhost/my_project"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECURITY_PASSWORD_SALT = "78ry3487tyf34yuhfy73t"
+    SECURITY_PASSWORD_SALT = "78ry3487tyf34dr73t874837ry"
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTER_EMAIL = False
 
@@ -47,6 +53,6 @@ class Configuration(object):
 
 
 config = {
-    "development": DevelopmentConfig,
+    "development": Config,
     "default": DevelopmentConfig,
 }

@@ -207,5 +207,39 @@ def drop_down_progress(page_num):
                             translation_available=0))
 
 
+@ir_voc.route("/add_random_words", methods=["GET"])
+@login_required
+def add_random_words():
+    vocabulary_actions_ir = VocabularyActionsIR(current_user)
+    user_vocabulary_filling_result = vocabulary_actions_ir.user_vocabulary_fill()
+    message_string = flashed_messages_dict_ir[
+        MessagesIR.words_were_added_successfully].format(count=user_vocabulary_filling_result.count) \
+        if isinstance(user_vocabulary_filling_result.count, int) \
+        else flashed_messages_dict_ir[MessagesIR.words_adding_error]
+
+    flash(message=message_string, category="info")
+    return redirect(url_for("ir_voc.user_voc"))
+
+
+@ir_voc.route("/update_vocabulary", methods=["GET"])
+@login_required
+def update_vocabulary():
+    vocabulary_actions_ir = VocabularyActionsIR(current_user)
+    vocabulary_actions_ir.update_vocabulary()
+    flash("Words were successfully added", category="info")
+    return redirect(url_for("ir_voc.user_voc"))
+
+
+@ir_voc.route("/restore_lost_words", methods=["GET"])
+@login_required
+def restore_lost_words():
+    vocabulary_actions_ir = VocabularyActionsIR(current_user)
+    restoring_result = vocabulary_actions_ir.restore_lost_words_handler()
+    message = flashed_messages_dict_ir[MessagesIR.lost_words_successful_restoring] \
+        if restoring_result else flashed_messages_dict_ir[MessagesIR.lost_words_restoring_exception]
+    flash(message=message, category="info")
+    return redirect(url_for("ir_voc.user_voc"))
+
+
 if __name__ == "__main__":
     pass

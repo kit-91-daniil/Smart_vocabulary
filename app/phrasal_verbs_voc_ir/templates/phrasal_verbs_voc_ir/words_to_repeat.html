@@ -13,7 +13,7 @@
     {% elif lost_words_pagin_obj %}
     <h3 class="ml-2" style="color: blue;">Вы пропустили опрос этих слов более 1 дня назад</h3>
     <h3 class="ml-2" style="color: blue;">Прогресс их изучения обнулен. Их повторение начнется
-        <a style="width: 100px;" href="{{ url_for('ir_voc.drop_down_progress',
+        <a style="width: 100px;" href="{{ url_for('phrasal_verbs_voc_ir.drop_down_progress',
         page_num=lost_words_pagin_obj.page) }}"
         class="btn btn-info" role="button" aria-pressed="true">заново
         </a>
@@ -24,7 +24,7 @@
 
     {% endif %}
 
-    <a style="width: 150px;" href="{{ url_for('ir_voc.user_voc') }}"
+    <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.user_voc') }}"
     class="btn btn-success mt-2" role="button" aria-pressed="true">К переводчику
     </a>
 <!--NEAR WORDS-->
@@ -40,12 +40,12 @@
                       <th scope="col">Слово</th>
                       <th scope="col">
                       {% if translation_available == 0 %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_near_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_near_verbs',
                         page_num=near_words_pagin_obj.page, translation_available=1) }}"
                         class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
                       </a>
                       {% else %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_near_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_near_verbs',
                         page_num=near_words_pagin_obj.page, translation_available=0) }}"
                         class="btn btn-success mt-2" role="button" aria-pressed="true">Скрыть перевод
                       </a>
@@ -77,7 +77,7 @@
                             {% if page %}
                                 <li class="page-item" >
                                     <a class="page-link"
-                                       href="{{ url_for('ir_voc.show_near_words', page_num=page,
+                                       href="{{ url_for('phrasal_verbs_voc_ir.show_near_verbs', page_num=page,
                                        translation_available=translation_available) }}">{{page}}
                                     </a>
                                 </li>
@@ -106,18 +106,18 @@
                       <th scope="col">Слово</th>
                       <th scope="col">
                       {% if translation_available == 0 %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_missing_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_missing_verbs',
                         page_num=missing_words_pagin_obj.page, translation_available=1) }}"
                         class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
                       </a>
                       {% else %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_missing_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_missing_verbs',
                         page_num=missing_words_pagin_obj.page, translation_available=0) }}"
                         class="btn btn-success mt-2" role="button" aria-pressed="true">Скрыть перевод
                       </a>
                       {% endif %}
-                        <th>Время</th>
-                      </th>
+                     </th>
+                    <th>Время</th>
                     </tr>
                   </thead>
 
@@ -125,7 +125,7 @@
                   {% for i in missing_words_pagin_obj.items %}
                     <tr>
                       <th scope="row">{{ missing_words_pagin_obj.items.index(i)+1 }}</th>
-                      <td>{{ i.vocabulary.word }}</td>
+                      <td>{{ i.vocabulary.phrasal_verb }}</td>
                         <td>
                         {% if translation_available %}
                             {{ i.vocabulary.translation }}
@@ -144,8 +144,9 @@
                             {% if page %}
                                 <li class="page-item" >
                                     <a class="page-link"
-                                       href="{{ url_for('ir_voc.show_missing_words', page_num=page,
-                                       translation_available=translation_available) }}">{{page}}
+                                       href="{{ url_for('phrasal_verbs_voc_ir.show_missing_verbs',
+                                       page_num=page, translation_available=translation_available) }}">
+                                        {{page}}
                                     </a>
                                 </li>
                             {% else %}
@@ -173,12 +174,12 @@
                       <th scope="col">Слово</th>
                       <th scope="col">
                       {% if translation_available == 0 %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_lost_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_lost_verbs',
                         page_num=lost_words_pagin_obj.page, translation_available=1) }}"
                         class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
                       </a>
                       {% else %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_lost_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_lost_verbs',
                         page_num=lost_words_pagin_obj.page, translation_available=0) }}"
                         class="btn btn-success mt-2" role="button" aria-pressed="true">Скрыть перевод
                       </a>
@@ -192,7 +193,7 @@
                   {% for i in lost_words_pagin_obj.items %}
                     <tr>
                       <th scope="row">{{ lost_words_pagin_obj.items.index(i)+1 }}</th>
-                      <td>{{ i.vocabulary.word }}</td>
+                      <td>{{ i.vocabulary.phrasal_verb }}</td>
                         <td>
                         {% if translation_available %}
                             {{ i.vocabulary.translation }}
@@ -210,7 +211,7 @@
                             {% if page %}
                                 <li class="page-item" >
                                     <a class="page-link"
-                                       href="{{ url_for('ir_voc.show_lost_words', page_num=page,
+                                       href="{{ url_for('phrasal_verbs_voc_ir.show_lost_verbs', page_num=page,
                                        translation_available=translation_available) }}">{{page}}
                                     </a>
                                 </li>
@@ -240,12 +241,12 @@
                       <th scope="col">Слово</th>
                       <th scope="col">
                       {% if translation_available == 0 %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_learned_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_learned_verbs',
                         page_num=learned_words_pagin_obj.page, translation_available=1) }}"
                         class="btn btn-info mt-2" role="button" aria-pressed="true">Перевод
                       </a>
                       {% else %}
-                      <a style="width: 150px;" href="{{ url_for('ir_voc.show_learned_words',
+                      <a style="width: 150px;" href="{{ url_for('phrasal_verbs_voc_ir.show_learned_verbs',
                         page_num=learned_words_pagin_obj.page, translation_available=0) }}"
                         class="btn btn-success mt-2" role="button" aria-pressed="true">Скрыть перевод
                       </a>
@@ -277,7 +278,7 @@
                             {% if page %}
                                 <li class="page-item" >
                                     <a class="page-link"
-                                       href="{{ url_for('ir_voc.show_learned_words', page_num=page,
+                                       href="{{ url_for('phrasal_verbs_voc_ir.show_learned_verbs', page_num=page,
                                        translation_available=translation_available) }}">{{page}}
                                     </a>
                                 </li>
