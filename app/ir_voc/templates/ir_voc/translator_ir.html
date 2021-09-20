@@ -157,6 +157,14 @@
                                         {{ seconds_to_string(words_status_dict["lost_test_obj"].first().time_to_repeat) }}
                        </a> назад
 
+                        {% if current_user.has_role("administrator") %}
+                        <a href="{{ url_for('ir_voc.restore_lost_words') }}"
+                           class="btn btn-success btn-block mt-2" role="button" aria-pressed="true">
+                            Восстановить прогресс изучения
+                        </a>
+                        {%endif%}
+
+
                     {% endif %}
 
                   </div>
